@@ -2,5 +2,3 @@
 .gradle
 
 .DS_Store
-rust/target
-rust/.idea

@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+    "lib/graph",
+    "lib/integer_coding",
+    "lib/passwordgen",
+    "lib/passwordgenffi",
+    "bin/ezmempass"
+]
+

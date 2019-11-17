@@ -1,0 +1,22 @@
+apply plugin: 'base'
+
+clean {
+    delete file("rust/target")
+}
+
+task rustBuild(type: Exec) {
+    def inputFileTree = fileTree("rust") {
+        include("**/*.rs")
+        include("**/*.toml")
+        include("**/*.txt")
+        include("Cargo.lock")
+        include("Cargo.toml")
+        exclude("target")
+    }
+    inputs.files(inputFileTree.getFiles())
+    outputs.files(
+        file("rust/target/debug"),
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'test'
+}

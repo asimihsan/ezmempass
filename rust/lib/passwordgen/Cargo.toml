@@ -1,0 +1,15 @@
+[package]
+name = "passwordgen"
+version = "0.1.0"
+authors = ["Asim Ihsan <asim.ihsan@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "passwordgen"
+
+[dependencies]
+rand = "0.7.2"
+graph = { path = "../graph" }
+integer_coding = { path = "../integer_coding" }

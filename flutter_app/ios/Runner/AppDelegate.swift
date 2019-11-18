@@ -14,10 +14,15 @@ import Flutter
         binaryMessenger: controller.binaryMessenger)
     generatePassphraseChannel.setMethodCallHandler({
         (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-        let res = generate_passphrase_ffi("input")
-        let s_res = String(cString: res!)
-        generate_passphrase_ffi_release(UnsafeMutablePointer(mutating: res))
-        result(s_res)
+        if let args = call.arguments as? Dictionary<String, Any>,
+            let input = args["input"] as? String {
+            let res = generate_passphrase_ffi(input)
+            let s_res = String(cString: res!)
+            generate_passphrase_ffi_release(UnsafeMutablePointer(mutating: res))
+            result(s_res)
+        } else {
+            result(FlutterError.init(code: "bad args", message: nil, details: nil))
+        }
     })
     
     GeneratedPluginRegistrant.register(with: self)

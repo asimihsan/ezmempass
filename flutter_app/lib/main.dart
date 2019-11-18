@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
 
-void main() => runApp(MyApp());
+void main() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight]).then((_) {
+      runApp(MyApp());
+    });
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -52,7 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _generatePassphrase() async {
     String passphrase;
     try {
-      passphrase = await platform.invokeMethod('generatePassphrase');
+      final String input = '{"passphrase_length": 7}';
+      passphrase = await platform.invokeMethod(
+          'generatePassphrase', {"input": input});
     } on PlatformException catch (e) {
       passphrase = "Failed to get passphrase: '${e.message}'.";
     }
@@ -113,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_passphrase',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.body1,
             ),
           ],
         ),

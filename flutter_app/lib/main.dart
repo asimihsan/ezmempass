@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:developer' as developer;
@@ -59,8 +61,19 @@ class _MyHomePageState extends State<MyHomePage> {
     String passphrase;
     try {
       final String input = '{"passphrase_length": 7}';
-      passphrase = await platform.invokeMethod(
+      final String result = await platform.invokeMethod(
           'generatePassphrase', {"input": input});
+      final Map<String, dynamic> resultDeser = jsonDecode(result);
+      final String generatedPassword = resultDeser['password'];
+      final String generatedPassphrase = resultDeser['passphrase'];
+
+      final StringBuffer resultBuffer = new StringBuffer();
+      resultBuffer.write("Password: ");
+      resultBuffer.write(generatedPassword);
+      resultBuffer.write("\n");
+      resultBuffer.write("Passphrase: ");
+      resultBuffer.write(generatedPassphrase);
+      passphrase = resultBuffer.toString();
     } on PlatformException catch (e) {
       passphrase = "Failed to get passphrase: '${e.message}'.";
     }

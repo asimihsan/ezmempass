@@ -5,8 +5,10 @@ use std::os::raw::c_char;
 
 #[derive(Serialize)]
 struct GeneratePassphraseFfiResult {
-    prefixes: Vec<String>,
-    passphrase: Vec<String>,
+    password: String,
+    passphrase: String,
+    prefixes_elems: Vec<String>,
+    passphrase_elems: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -27,10 +29,11 @@ pub unsafe extern "C" fn generate_passphrase_ffi(input: *const c_char) -> *mut c
     let passphrase_length = input_deser.passphrase_length;
 
     let passphrase_result = generate_passphrase(passphrase_length).unwrap();
-
     let result = GeneratePassphraseFfiResult {
-        prefixes: passphrase_result.prefixes,
-        passphrase: passphrase_result.passphrase,
+        password: passphrase_result.prefixes.join(""),
+        passphrase: passphrase_result.passphrase.join(" "),
+        prefixes_elems: passphrase_result.prefixes,
+        passphrase_elems: passphrase_result.passphrase,
     };
     let result = serde_json::to_string(&result).unwrap();
     CString::new(result).unwrap().into_raw()

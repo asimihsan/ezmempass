@@ -2,6 +2,9 @@ apply plugin: 'base'
 
 clean {
     delete file("rust/target")
+    delete file("build")
+    delete file("flutter_app/ios/Runner/passwordgenffi.h")
+    delete file("flutter_app/ios/Flutter/libpasswordgenffi.a")
 }
 
 task rustBuild(type: Exec) {
@@ -14,9 +17,54 @@ task rustBuild(type: Exec) {
         exclude("target")
     }
     inputs.files(inputFileTree.getFiles())
-    outputs.files(
-        file("rust/target/debug"),
-    )
+    outputs.dir file("rust/target/debug")
     workingDir 'rust'
     commandLine 'cargo', 'test'
+}
+
+task rustGenerateHeader(type: Exec) {
+    dependsOn(rustBuild)
+    def inputFileTree = fileTree("rust") {
+        include("rust/lib/passwordgenffi/**/*")
+    }
+    outputs.files(
+        file("build/passwordgenffi.h")
+    )
+    workingDir 'rust/lib/passwordgenffi'
+    commandLine 'bash', '-c', 'cbindgen --lang c > ../../../build/passwordgenffi.h'
+}
+
+task rustGenerateIosLibrary(type: Exec) {
+    dependsOn(rustBuild)
+    outputs.files(
+        file("rust/target/universal/release/libpasswordgenffi.a")
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'lipo', '--release'
+}
+
+task rustCopyIosLibraryToBuild(type: Copy) {
+    dependsOn(rustGenerateIosLibrary)
+    from "rust/target/universal/release/libpasswordgenffi.a"
+    into "build"
+}
+
+task rustIosBuild {
+    dependsOn(rustCopyIosLibraryToBuild, rustGenerateHeader)
+}
+
+task iosCopyRustHeader(type: Copy) {
+    dependsOn(rustIosBuild)
+    from "build/passwordgenffi.h"
+    into "flutter_app/ios/Runner"
+}
+
+task iosCopyRustLibrary(type: Copy) {
+    dependsOn(rustIosBuild)
+    from "build/libpasswordgenffi.a"
+    into "flutter_app/ios/Flutter"
+}
+
+task rustIosCopy {
+    dependsOn(iosCopyRustLibrary, iosCopyRustHeader)
 }

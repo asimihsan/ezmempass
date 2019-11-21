@@ -16,10 +16,10 @@ pub struct GeneratePassphraseOutput {
     pub cost: i64,
 }
 
+const WORDLIST_ENWIKI: &'static [u8] = include_bytes!("wordlist_enwiki.txt");
+
 pub fn generate_passphrase(passphrase_size: i32) -> io::Result<(GeneratePassphraseOutput)> {
-    let wordlist_bytes = include_bytes!("wordlist_enwiki.txt");
-    let wordlist_bytes_pointer = &wordlist_bytes[..];
-    let mut data_file_reader = BufReader::new(wordlist_bytes_pointer);
+    let mut data_file_reader = BufReader::new(WORDLIST_ENWIKI);
 
     let mut number_of_words = String::new();
     data_file_reader.read_line(&mut number_of_words)?;
@@ -66,7 +66,7 @@ fn get_random_passphrase_graph(
     prefixes: &[String],
     prefix_to_words: &HashMap<String, Vec<String>>,
     words: &[String],
-    word_to_index: &HashMap<String, usize>,
+    word_to_index: &HashMap<String, u32>,
     word_to_edges_encoded: &Vec<Vec<u8>>,
 ) -> (Vec<String>, i64) {
     let mut g = SimpleInMemoryGraph::new();
@@ -88,15 +88,22 @@ fn get_random_passphrase_graph(
                 } else {
                     -(word_to_index[prefix2_2gram_word] as i64)
                 };
-                g.add_edge(prefix1_1gram_word, prefix2_2gram_word, weight);
+                g.add_edge(
+                    word_to_index[prefix1_1gram_word],
+                    word_to_index[prefix2_2gram_word],
+                    weight,
+                );
                 //                println!(
                 //                    "2gram word1 {} word2 {} weight {}",
                 //                    prefix1_1gram_word, prefix2_2gram_word, weight
                 //                );
             }
             for prefix2_1gram_word in prefix2_1gram_words {
-                if g.get_edge_weight(prefix1_1gram_word, prefix2_1gram_word)
-                    .is_none()
+                if g.get_edge_weight(
+                    word_to_index[prefix1_1gram_word],
+                    word_to_index[prefix2_1gram_word],
+                )
+                .is_none()
                 {
                     let weight: i64 = if start {
                         -(word_to_index[prefix1_1gram_word] as i64
@@ -109,28 +116,36 @@ fn get_random_passphrase_graph(
                     //                        "1gram word1 {} word2 {} weight {}",
                     //                        prefix1_1gram_word, prefix2_1gram_word, weight
                     //                    );
-                    g.add_edge(prefix1_1gram_word, prefix2_1gram_word, weight);
+                    g.add_edge(
+                        word_to_index[prefix1_1gram_word],
+                        word_to_index[prefix2_1gram_word],
+                        weight,
+                    );
                 }
             }
             start = false;
         }
     }
-    let first_prefix_words: Vec<&str> = prefix_to_words
+    let first_prefix_words: Vec<u32> = prefix_to_words
         .get(prefixes.first().unwrap())
         .unwrap()
         .iter()
-        .map(AsRef::as_ref)
+        .map(|word| word_to_index[word])
         .collect();
-    let last_prefix_words: Vec<&str> = prefix_to_words
+    let last_prefix_words: Vec<u32> = prefix_to_words
         .get(prefixes.last().unwrap())
         .unwrap()
         .iter()
-        .map(AsRef::as_ref)
+        .map(|word| word_to_index[word])
         .collect();
     //    println!("first_prefix_words: {:?}", first_prefix_words);
     //    println!("last_prefix_words: {:?}", last_prefix_words);
     let (shortest_path, cost) =
         shortest_path_multiple(&g, first_prefix_words, last_prefix_words).unwrap();
+    let shortest_path = shortest_path
+        .iter()
+        .map(|index| words[*index as usize].clone())
+        .collect();
     (shortest_path, cost)
 }
 
@@ -138,10 +153,10 @@ fn get_next_words(
     word: &str,
     prefix_filter: &str,
     words: &[String],
-    word_to_index: &HashMap<String, usize>,
+    word_to_index: &HashMap<String, u32>,
     word_to_edges_encoded: &Vec<Vec<u8>>,
 ) -> Vec<String> {
-    let index = word_to_index[word];
+    let index = word_to_index[word] as usize;
     let edges_encoded_bytes = &word_to_edges_encoded[index];
     let decoder = DeltaDecoder::new(edges_encoded_bytes);
     decoder
@@ -163,10 +178,10 @@ fn get_random_prefixes(prefixes: &Vec<&String>, length: i32) -> Vec<String> {
     result
 }
 
-fn get_word_to_index(words: &Vec<String>) -> HashMap<String, usize> {
-    let mut result: HashMap<String, usize> = HashMap::with_capacity(words.len());
+fn get_word_to_index(words: &Vec<String>) -> HashMap<String, u32> {
+    let mut result: HashMap<String, u32> = HashMap::with_capacity(words.len());
     for (i, word) in words.iter().enumerate().skip(1) {
-        result.insert(word.parse().unwrap(), i);
+        result.insert(word.parse().unwrap(), i as u32);
     }
     result
 }

@@ -73,12 +73,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget passwordLabel = Text(
       "Password",
-      style: Theme.of(context).textTheme.headline,
+      style: Theme.of(context).textTheme.headline.copyWith(
+          fontFamily: 'RecursiveSansLinear'),
     );
     final Widget passwordValue = Expanded(
       child: SelectableText(
         _password,
-        style: Theme.of(context).textTheme.title,
+        style: Theme.of(context).textTheme.title.copyWith(
+            fontFamily: 'RecursiveMonoCasual'),
       )
     );
     final Widget passwordContainer = Container(
@@ -105,12 +107,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget passphraseLabel = Text(
       "Passphrase",
-      style: Theme.of(context).textTheme.headline,
+      style: Theme.of(context).textTheme.headline.copyWith(
+          fontFamily: 'RecursiveSansLinear'),
     );
     final Widget passphraseValue = Expanded(
       child: SelectableText(
         _passphrase,
-        style: Theme.of(context).textTheme.title,
+        style: Theme.of(context).textTheme.title.copyWith(
+            fontFamily: 'RecursiveMonoCasual'),
       )
     );
     final Widget passphraseContainer = Container(
@@ -137,7 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget numberOfWordsLabel = Text(
       "Number of words",
-      style: Theme.of(context).textTheme.headline,
+      style: Theme.of(context).textTheme.headline.copyWith(
+          fontFamily: 'RecursiveSansLinear'),
     );
     final double minPassphraseLength = 4.0;
     final double maxPassphraseLength = 25.0;
@@ -156,9 +161,12 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       )
     );
-    final Widget numberOfWordsSliderValue = Text(
-      '$_passphraseLength',
-      style: Theme.of(context).textTheme.title,
+    final Widget numberOfWordsSliderValue = Container(
+      width: 50.0,
+      child: Text(
+        '$_passphraseLength',
+        style: Theme.of(context).textTheme.title,
+      )
     );
     final Widget numberOfWordsContainer = Container(
         padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),

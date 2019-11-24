@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/gen/protos/preferences.pb.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -139,6 +142,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // ------------------------------------------------------------------------
+    //  Shared widgets
+    // ------------------------------------------------------------------------
+    Icon shareIcon;
+    if (Platform.isAndroid) {
+      shareIcon = Icon(Icons.content_paste, size: 44);
+    } else {
+      shareIcon = Icon(CupertinoIcons.share, size: 44);
+    }
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
     //  Password
     // ------------------------------------------------------------------------
     final Widget passwordLabel = Text(
@@ -153,8 +167,16 @@ class _MyHomePageState extends State<MyHomePage> {
             fontFamily: 'RecursiveMonoLinear'),
       )
     );
+    final Widget passwordValueCopyButton = IconButton(
+      icon: shareIcon,
+      alignment: Alignment.topCenter,
+      padding: const EdgeInsets.all(0),
+      onPressed: () {
+        Share.share(_password);
+      },
+    );
     final Widget passwordContainer = Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: <Widget>[
             Row(
@@ -164,7 +186,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Row(
               children: <Widget>[
-                passwordValue
+                passwordValue,
+                passwordValueCopyButton
               ],
             )
           ],
@@ -187,8 +210,16 @@ class _MyHomePageState extends State<MyHomePage> {
             fontFamily: 'RecursiveMonoLinear'),
       )
     );
+    final Widget passphraseValueCopyButton = IconButton(
+      icon: shareIcon,
+      alignment: Alignment.topCenter,
+      padding: const EdgeInsets.all(0),
+      onPressed: () {
+        Share.share(_passphrase);
+      },
+    );
     final Widget passphraseContainer = Container(
-        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         child: Column(
           children: <Widget>[
             Row(
@@ -198,7 +229,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Row(
               children: <Widget>[
-                passphraseValue
+                passphraseValue,
+                passphraseValueCopyButton
               ],
             )
           ],
@@ -244,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }).toList(growable: false),
     );
     final Widget numberOfWordsContainer = Container(
-        padding: const EdgeInsets.fromLTRB(32, 0, 64, 8),
+        padding: const EdgeInsets.fromLTRB(16, 0, 32, 8),
         child: Column(
           children: <Widget>[
             Row(
@@ -277,7 +309,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     );
     final Widget capitalLetterContainer = Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: capitalLetterSwitch
     );
     // ------------------------------------------------------------------------
@@ -300,7 +332,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
     );
     final Widget digitContainer = Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         child: digitSwitch
     );
     // ------------------------------------------------------------------------
@@ -323,11 +355,10 @@ class _MyHomePageState extends State<MyHomePage> {
         }
     );
     final Widget symbolContainer = Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         child: symbolSwitch
     );
     // ------------------------------------------------------------------------
-
 
     return Scaffold(
       appBar: AppBar(

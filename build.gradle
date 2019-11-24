@@ -3,20 +3,27 @@ apply plugin: 'base'
 clean {
     delete file("rust/target")
     delete file("build")
+    delete file("flutter_app/build")
     delete file("flutter_app/ios/Runner/passwordgenffi.h")
     delete file("flutter_app/ios/Flutter/libpasswordgenffi.a")
 }
 
+def rustInputFileTree = fileTree("rust") {
+    include("**/*.rs")
+    include("**/*.toml")
+    include("**/*.txt")
+    include("Cargo.lock")
+    include("Cargo.toml")
+    exclude("target")
+}
+
+def flutterInputFileTree = fileTree("flutter_app") {
+    exclude("build")
+    exclude("*.iml")
+}
+
 task rustBuild(type: Exec) {
-    def inputFileTree = fileTree("rust") {
-        include("**/*.rs")
-        include("**/*.toml")
-        include("**/*.txt")
-        include("Cargo.lock")
-        include("Cargo.toml")
-        exclude("target")
-    }
-    inputs.files(inputFileTree.getFiles())
+    inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/debug")
     workingDir 'rust'
     commandLine 'cargo', 'test'
@@ -24,9 +31,7 @@ task rustBuild(type: Exec) {
 
 task rustGenerateHeader(type: Exec) {
     dependsOn(rustBuild)
-    def inputFileTree = fileTree("rust") {
-        include("rust/lib/passwordgenffi/**/*")
-    }
+    inputs.files(rustInputFileTree.getFiles())
     outputs.files(
         file("build/passwordgenffi.h")
     )
@@ -36,15 +41,7 @@ task rustGenerateHeader(type: Exec) {
 
 task rustGenerateIosLibrary(type: Exec) {
     dependsOn(rustBuild)
-    def inputFileTree = fileTree("rust") {
-        include("**/*.rs")
-        include("**/*.toml")
-        include("**/*.txt")
-        include("Cargo.lock")
-        include("Cargo.toml")
-        exclude("target")
-    }
-    inputs.files(inputFileTree.getFiles())
+    inputs.files(rustInputFileTree.getFiles())
     outputs.files(
         file("rust/target/universal/release/libpasswordgenffi.a")
     )
@@ -54,32 +51,38 @@ task rustGenerateIosLibrary(type: Exec) {
 
 task rustCopyIosLibraryToBuild(type: Copy) {
     dependsOn(rustGenerateIosLibrary)
+    inputs.files(rustInputFileTree.getFiles())
     from "rust/target/universal/release/libpasswordgenffi.a"
     into "build"
 }
 
 task rustIosBuild {
     dependsOn(rustCopyIosLibraryToBuild, rustGenerateHeader)
+    inputs.files(rustInputFileTree.getFiles())
 }
 
 task iosCopyRustHeader(type: Copy) {
     dependsOn(rustIosBuild)
+    inputs.files(rustInputFileTree.getFiles())
     from "build/passwordgenffi.h"
     into "flutter_app/ios/Runner"
 }
 
 task iosCopyRustLibrary(type: Copy) {
     dependsOn(rustIosBuild)
+    inputs.files(rustInputFileTree.getFiles())
     from "build/libpasswordgenffi.a"
     into "flutter_app/ios/Flutter"
 }
 
 task rustIosCopy {
     dependsOn(iosCopyRustLibrary, iosCopyRustHeader)
+    inputs.files(rustInputFileTree.getFiles())
 }
 
 task rustAndroidAarch64Build(type: Exec) {
     dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/aarch64-linux-android/release")
     workingDir 'rust'
     commandLine 'cargo', 'ndk', '--target', 'aarch64-linux-android',
@@ -88,6 +91,7 @@ task rustAndroidAarch64Build(type: Exec) {
 
 task rustAndroidArmv7Build(type: Exec) {
     dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/armv7-linux-androideabi/release")
     workingDir 'rust'
     commandLine 'cargo', 'ndk', '--target', 'armv7-linux-androideabi',
@@ -96,6 +100,7 @@ task rustAndroidArmv7Build(type: Exec) {
 
 task rustAndroidi686Build(type: Exec) {
     dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/i686-linux-android/release")
     workingDir 'rust'
     commandLine 'cargo', 'ndk', '--target', 'i686-linux-android',
@@ -104,6 +109,7 @@ task rustAndroidi686Build(type: Exec) {
 
 task rustAndroidx8664Build(type: Exec) {
     dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/x86_64-linux-android/release")
     workingDir 'rust'
     commandLine 'cargo', 'ndk', '--target', 'x86_64-linux-android',
@@ -116,20 +122,42 @@ task rustAndroidBuild {
               rustAndroidArmv7Build,
               rustAndroidi686Build,
               rustAndroidx8664Build)
-    def inputFileTree = fileTree("rust") {
-        include("**/*.rs")
-        include("**/*.toml")
-        include("**/*.txt")
-        include("Cargo.lock")
-        include("Cargo.toml")
-        exclude("target")
-    }
-    inputs.files(inputFileTree.getFiles())
+    inputs.files(rustInputFileTree.getFiles())
 }
 
-task all {
+task flutterBuildIos(type: Exec) {
     dependsOn(
         rustIosCopy,
         //rustAndroidBuild,
     )
+    inputs.files(flutterInputFileTree.getFiles())
+    outputs.dir file("flutter_app/build")
+    workingDir 'flutter_app'
+    commandLine 'flutter', 'build', 'ios', '--simulator'
+}
+
+task flutterBuild {
+    dependsOn(
+        flutterBuildIos,
+    )
+}
+
+task all {
+    dependsOn(
+        flutterBuild
+    )
+}
+
+task backup(type: Zip) {
+    dependsOn(clean)
+
+    archiveFileName = "ezmempass.zip"
+    destinationDirectory = file("../")
+
+    from('.') {
+        include '**/*'
+        include '.git/**/*'
+    }
+    zip64 true
+    reproducibleFileOrder true
 }

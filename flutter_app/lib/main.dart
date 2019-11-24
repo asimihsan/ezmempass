@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,20 +47,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('com.asimihsan/generate_passphrase');
+  SharedPreferences sharedPreferences;
+
   String _password = '';
   String _passphrase = '';
   int _passphraseLength = 7;
   bool _addCapitalLetter = false;
   bool _addDigit = false;
   bool _addSymbol = false;
-  bool _onlyGeneratingOnce = true;
-  bool _isAlreadyGenerating = false;
 
   Future<void> _generatePassphrase() async {
-    if (_isAlreadyGenerating) {
-      return;
-    }
-    _isAlreadyGenerating = true;
     String password;
     String passphrase;
     try {
@@ -80,18 +77,46 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _password = password;
       _passphrase = passphrase;
-      _onlyGeneratingOnce = false;
-      _isAlreadyGenerating = false;
     });
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    SharedPreferences.getInstance().then((SharedPreferences sp) {
+      sharedPreferences = sp;
+      String spSerialized = sharedPreferences.getString("preferences");
+      if (spSerialized == null) {
+        return;
+      }
+      final Map<String, dynamic> spDeserialized = jsonDecode(spSerialized);
+      int passphraseLength = spDeserialized["passphrase_length"] ?? 7;
+      bool addCapitalLetter = spDeserialized["add_capital_letter"] ?? false;
+      bool addDigit = spDeserialized["add_digit"] ?? false;
+      bool addSymbol = spDeserialized["add_symbol"] ?? false;
+      setState(() {
+        _passphraseLength = passphraseLength;
+        _addCapitalLetter = addCapitalLetter;
+        _addDigit = addDigit;
+        _addSymbol = addSymbol;
+      });
+      _generatePassphrase();
+    });
+  }
+
+  void persistPreferences() {
+    final Map<String, dynamic> inputMap = new Map();
+    inputMap["passphrase_length"] = _passphraseLength;
+    inputMap["add_capital_letter"] = _addCapitalLetter;
+    inputMap["add_digit"] = _addDigit;
+    inputMap["add_symbol"] = _addSymbol;
+    final String preferences = jsonEncode(inputMap);
+    sharedPreferences.setString("preferences", preferences);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_onlyGeneratingOnce) {
-      _onlyGeneratingOnce = false;
-      _generatePassphrase();
-    }
-
     // ------------------------------------------------------------------------
     //  Password
     // ------------------------------------------------------------------------
@@ -161,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
-    //  Number of words slider.
+    //  Number of words selector.
     // ------------------------------------------------------------------------
     final Widget numberOfWordsLabel = Text(
       "Number of words",
@@ -184,9 +209,10 @@ class _MyHomePageState extends State<MyHomePage> {
           return;
         }
         setState(() {
-          _onlyGeneratingOnce = true;
           _passphraseLength = newPassphraseLength;
         });
+        _generatePassphrase();
+        persistPreferences();
       },
       items: <int>[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                    21, 22, 23, 24].map<DropdownMenuItem<int>>((int value) {
@@ -224,8 +250,9 @@ class _MyHomePageState extends State<MyHomePage> {
       onChanged: (bool value) {
         setState(() {
           _addCapitalLetter = value;
-          _onlyGeneratingOnce = true;
         });
+        _generatePassphrase();
+        persistPreferences();
       }
     );
     final Widget capitalLetterContainer = Container(
@@ -246,8 +273,9 @@ class _MyHomePageState extends State<MyHomePage> {
         onChanged: (bool value) {
           setState(() {
             _addDigit = value;
-            _onlyGeneratingOnce = true;
           });
+          _generatePassphrase();
+          persistPreferences();
         }
     );
     final Widget digitContainer = Container(
@@ -268,8 +296,9 @@ class _MyHomePageState extends State<MyHomePage> {
         onChanged: (bool value) {
           setState(() {
             _addSymbol = value;
-            _onlyGeneratingOnce = true;
           });
+          _generatePassphrase();
+          persistPreferences();
         }
     );
     final Widget symbolContainer = Container(
@@ -295,11 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _onlyGeneratingOnce = true;
-          });
-        },
+        onPressed: _generatePassphrase,
         tooltip: 'Generate',
         child: Icon(Icons.add),
       ),

@@ -75,8 +75,9 @@ pub fn generate_passphrase_internal(
         &word_to_edges_encoded,
         rng,
     );
-    let password = convert_prefixes_to_password(
+    let (password, passphrase) = convert_prefixes_to_password_and_passphrase(
         &random_prefixes,
+        &random_passphrase,
         input.add_digit,
         input.add_capital_letter,
         input.add_symbol,
@@ -84,24 +85,26 @@ pub fn generate_passphrase_internal(
     );
     Ok(GeneratePassphraseOutput {
         password: password,
-        passphrase: random_passphrase.join(" "),
+        passphrase: passphrase,
         prefixes: random_prefixes,
         words: random_passphrase,
         cost,
     })
 }
 
-fn convert_prefixes_to_password(
-    random_prefixes: &[String],
+fn convert_prefixes_to_password_and_passphrase(
+    random_prefixes: &Vec<String>,
+    random_passphrase: &Vec<String>,
     add_digit: bool,
     add_capital_letter: bool,
     add_symbol: bool,
     rng: &mut impl Rng,
-) -> String {
+) -> (String, String) {
     let random_digits: Vec<&str> = vec!["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
     let random_symbols: Vec<&str> = vec!["@", "#", "$", "&", "%", "!"];
 
-    let mut result = String::with_capacity(32);
+    let mut prefixes_result = String::new();
+    let mut passphrase_result = String::new();
     let number_of_prefixes = random_prefixes.len();
     let random_elem = rng.gen_range(0, number_of_prefixes);
     let insert_before_elem = rng.gen_bool(0.5);
@@ -124,23 +127,44 @@ fn convert_prefixes_to_password(
         }
     }
     for i in 0..random_prefixes.len() {
+        let last_elem = i == random_prefixes.len() - 1;
         if i != random_elem {
-            result.push_str(&random_prefixes[i]);
+            prefixes_result.push_str(&random_prefixes[i]);
+            passphrase_result.push_str(&random_passphrase[i]);
+            if !last_elem {
+                passphrase_result.push_str(" ");
+            }
             continue;
         }
-        if insert_before_elem {
-            result.push_str(&random_insertion);
+        if insert_before_elem && random_insertion.len() > 0 {
+            prefixes_result.push_str(&random_insertion);
+            passphrase_result.push_str(&random_insertion);
+            if !last_elem && random_insertion.len() == 0 {
+                passphrase_result.push_str(" ");
+            }
         }
         if add_capital_letter {
-            result.push_str(&random_prefixes[i].to_uppercase());
+            prefixes_result.push_str(&random_prefixes[i].to_uppercase());
+            passphrase_result.push_str(&random_passphrase[i].to_uppercase());
+            if !last_elem {
+                passphrase_result.push_str(" ");
+            }
         } else {
-            result.push_str(&random_prefixes[i]);
+            prefixes_result.push_str(&random_prefixes[i]);
+            passphrase_result.push_str(&random_passphrase[i]);
+            if !last_elem {
+                passphrase_result.push_str(" ");
+            }
         }
-        if !insert_before_elem {
-            result.push_str(&random_insertion);
+        if !insert_before_elem && random_insertion.len() > 0 {
+            prefixes_result.push_str(&random_insertion);
+            passphrase_result.push_str(&random_insertion);
+            if !last_elem {
+                passphrase_result.push_str(" ");
+            }
         }
     }
-    result
+    (prefixes_result, passphrase_result)
 }
 
 fn get_random_passphrase_graph(

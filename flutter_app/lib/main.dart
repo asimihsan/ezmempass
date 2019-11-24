@@ -14,6 +14,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EzMemPass',
       theme: ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.blue,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'EzMemPass'),
@@ -44,13 +49,25 @@ class _MyHomePageState extends State<MyHomePage> {
   String _password = '';
   String _passphrase = '';
   int _passphraseLength = 7;
+  bool _addCapitalLetter = false;
+  bool _addDigit = false;
+  bool _addSymbol = false;
+  bool _onlyGeneratingOnce = true;
+  bool _isAlreadyGenerating = false;
 
   Future<void> _generatePassphrase() async {
+    if (_isAlreadyGenerating) {
+      return;
+    }
+    _isAlreadyGenerating = true;
     String password;
     String passphrase;
     try {
       final Map<String, dynamic> inputMap = new Map();
       inputMap["passphrase_length"] = _passphraseLength;
+      inputMap["add_capital_letter"] = _addCapitalLetter;
+      inputMap["add_digit"] = _addDigit;
+      inputMap["add_symbol"] = _addSymbol;
       final String input = jsonEncode(inputMap);
       final String result = await platform.invokeMethod(
           'generatePassphrase', {"input": input});
@@ -63,11 +80,18 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _password = password;
       _passphrase = passphrase;
+      _onlyGeneratingOnce = false;
+      _isAlreadyGenerating = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_onlyGeneratingOnce) {
+      _onlyGeneratingOnce = false;
+      _generatePassphrase();
+    }
+
     // ------------------------------------------------------------------------
     //  Password
     // ------------------------------------------------------------------------
@@ -80,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: SelectableText(
         _password,
         style: Theme.of(context).textTheme.title.copyWith(
-            fontFamily: 'RecursiveMonoCasual'),
+            fontFamily: 'RecursiveMonoLinear'),
       )
     );
     final Widget passwordContainer = Container(
@@ -106,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //  Passphrase
     // ------------------------------------------------------------------------
     final Widget passphraseLabel = Text(
-      "Passphrase",
+      "Memory aid",
       style: Theme.of(context).textTheme.headline.copyWith(
           fontFamily: 'RecursiveSansLinear'),
     );
@@ -114,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: SelectableText(
         _passphrase,
         style: Theme.of(context).textTheme.title.copyWith(
-            fontFamily: 'RecursiveMonoCasual'),
+            fontFamily: 'RecursiveMonoLinear'),
       )
     );
     final Widget passphraseContainer = Container(
@@ -144,66 +168,138 @@ class _MyHomePageState extends State<MyHomePage> {
       style: Theme.of(context).textTheme.headline.copyWith(
           fontFamily: 'RecursiveSansLinear'),
     );
-    final double minPassphraseLength = 4.0;
-    final double maxPassphraseLength = 25.0;
-    final int divisions = (maxPassphraseLength - minPassphraseLength).round() + 1;
-    final Widget numberOfWordsSlider = Flexible(
-      flex: 1,
-      child: Slider(
-        min: 4.0,
-        max: 25.0,
-        value: _passphraseLength.toDouble(),
-        divisions: divisions,
-        onChanged: (newPassphraseLength) {
-          setState(() {
-            _passphraseLength = newPassphraseLength.toInt();
-          });
-        },
-      )
-    );
-    final Widget numberOfWordsSliderValue = Container(
-      width: 50.0,
-      child: Text(
-        '$_passphraseLength',
-        style: Theme.of(context).textTheme.title,
-      )
+    final numberOfWordsSelector = DropdownButton<int>(
+      value: _passphraseLength,
+      icon: Icon(Icons.arrow_downward),
+      iconSize: 24,
+      elevation: 16,
+      style: Theme.of(context).textTheme.headline.copyWith(
+          fontFamily: 'RecursiveSansLinear'),
+      underline: Container(
+        height: 2,
+        color: Colors.grey,
+      ),
+      onChanged: (int newPassphraseLength) {
+        if (newPassphraseLength == _passphraseLength) {
+          return;
+        }
+        setState(() {
+          _onlyGeneratingOnce = true;
+          _passphraseLength = newPassphraseLength;
+        });
+      },
+      items: <int>[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                   21, 22, 23, 24].map<DropdownMenuItem<int>>((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text(value.toString()),
+        );
+      }).toList(growable: false),
     );
     final Widget numberOfWordsContainer = Container(
-        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+        padding: const EdgeInsets.fromLTRB(32, 0, 64, 8),
         child: Column(
           children: <Widget>[
             Row(
               children: <Widget>[
-                numberOfWordsLabel
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                numberOfWordsSlider,
-                numberOfWordsSliderValue
+                numberOfWordsLabel,
+                Spacer(),
+                numberOfWordsSelector,
               ],
             ),
           ],
         )
     );
-    // --------------
     // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    //  Add capital letter switch
+    // ------------------------------------------------------------------------
+    final Widget capitalLetterSwitch = SwitchListTile(
+      title: Text(
+          'Capital letters',
+          style: Theme.of(context).textTheme.headline.copyWith(
+              fontFamily: 'RecursiveSansLinear')),
+      value: _addCapitalLetter,
+      onChanged: (bool value) {
+        setState(() {
+          _addCapitalLetter = value;
+          _onlyGeneratingOnce = true;
+        });
+      }
+    );
+    final Widget capitalLetterContainer = Container(
+      padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+      child: capitalLetterSwitch
+    );
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    //  Add digit switch
+    // ------------------------------------------------------------------------
+    final Widget digitSwitch = SwitchListTile(
+        title: Text(
+            'Digit',
+            style: Theme.of(context).textTheme.headline.copyWith(
+                fontFamily: 'RecursiveSansLinear')),
+        value: _addDigit,
+        onChanged: (bool value) {
+          setState(() {
+            _addDigit = value;
+            _onlyGeneratingOnce = true;
+          });
+        }
+    );
+    final Widget digitContainer = Container(
+        padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+        child: digitSwitch
+    );
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    //  Add symbol
+    // ------------------------------------------------------------------------
+    final Widget symbolSwitch = SwitchListTile(
+        title: Text(
+            'Symbol',
+            style: Theme.of(context).textTheme.headline.copyWith(
+                fontFamily: 'RecursiveSansLinear')),
+        value: _addSymbol,
+        onChanged: (bool value) {
+          setState(() {
+            _addSymbol = value;
+            _onlyGeneratingOnce = true;
+          });
+        }
+    );
+    final Widget symbolContainer = Container(
+        padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
+        child: symbolSwitch
+    );
+    // ------------------------------------------------------------------------
+
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            passwordContainer,
-            passphraseContainer,
-            numberOfWordsContainer,
-          ],
-        )
+      body: ListView(
+        physics: ClampingScrollPhysics(),
+        children: <Widget>[
+          passwordContainer,
+          passphraseContainer,
+          numberOfWordsContainer,
+          capitalLetterContainer,
+          digitContainer,
+          symbolContainer,
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _generatePassphrase,
+        onPressed: () {
+          setState(() {
+            _onlyGeneratingOnce = true;
+          });
+        },
         tooltip: 'Generate',
         child: Icon(Icons.add),
       ),

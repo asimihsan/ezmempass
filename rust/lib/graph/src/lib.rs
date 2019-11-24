@@ -63,12 +63,12 @@ impl SimpleInMemoryGraph {
 /// Given a vector with [0..max-1] elements inside it you want a random index that is weighted to
 /// prefer elements at the front of the list. This is because our word lists are weighted most
 /// common to least common.
-fn get_weighted_random_index(max: usize) -> usize {
+fn get_weighted_random_index(max: usize, rng: &mut impl Rng) -> usize {
     let mut lo: i32 = 0;
     let mut hi: i32 = (max - 1) as i32;
     while lo <= hi {
         let mid: i32 = lo + (hi - lo) / 2;
-        let random_value: f64 = rand::thread_rng().gen();
+        let random_value: f64 = rng.gen();
         if random_value < 0.8 {
             hi = mid - 1;
         } else {
@@ -78,7 +78,7 @@ fn get_weighted_random_index(max: usize) -> usize {
     if hi < 1 {
         hi = 1;
     }
-    rand::thread_rng().gen_range(0, hi) as usize
+    rng.gen_range(0, hi) as usize
 }
 
 /// Returns shortest path from multiple start nodes to multiple goal nodes.
@@ -86,6 +86,7 @@ pub fn shortest_path_multiple(
     graph: &impl Graph,
     starts: Vec<u32>,
     goals: Vec<u32>,
+    rng: &mut impl Rng,
 ) -> Option<(Vec<u32>, i64)> {
     let mut current_shortest_path_cost: i64 = i64::min_value();
     let mut current_shortest_path: Vec<u32> = Vec::new();
@@ -116,8 +117,8 @@ pub fn shortest_path_multiple(
     let starts_len = starts.len();
     let goals_len = goals.len();
     while i < MAX_ITERS {
-        let start = starts[get_weighted_random_index(starts_len)];
-        let goal = goals[get_weighted_random_index(goals_len)];
+        let start = starts[get_weighted_random_index(starts_len, rng)];
+        let goal = goals[get_weighted_random_index(goals_len, rng)];
         match shortest_path(graph, start, goal) {
             None => continue,
             Some((path, cost)) => {
@@ -194,6 +195,7 @@ pub fn shortest_path(graph: &impl Graph, start: u32, goal: u32) -> Option<(Vec<u
 #[cfg(test)]
 mod shortest_path_simple_in_memory_graph_tests {
     use super::*;
+    use rand::rngs::mock;
 
     /// A -> B -> C -> D -> E, all edges weight of 1.
     /// A, E shortest path should return A, B, C, D, E
@@ -260,6 +262,7 @@ mod shortest_path_simple_in_memory_graph_tests {
     #[ignore]
     fn test_shortest_path_multiple_basic() {
         // == given ==
+        let mut rng = mock::StepRng::new(0, 1);
         let mut g: SimpleInMemoryGraph = SimpleInMemoryGraph::new();
         g.add_edge(1, 2, -1);
         g.add_edge(2, 3, -5);
@@ -267,7 +270,7 @@ mod shortest_path_simple_in_memory_graph_tests {
         g.add_edge(5, 6, -1);
 
         // == when ==
-        let shortest_path = shortest_path_multiple(&g, vec![1, 4], vec![3, 6]);
+        let shortest_path = shortest_path_multiple(&g, vec![1, 4], vec![3, 6], &mut rng);
 
         // == then ==
         assert_eq!(shortest_path.is_some(), true);

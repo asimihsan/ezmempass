@@ -10,15 +10,35 @@ use integer_coding::DeltaDecoder;
 
 const ONE_GRAM_INCREMENTAL_COST: i64 = 1_000_000;
 
+pub struct GeneratePassphraseInput {
+    pub passphrase_length: i32,
+    pub add_capital_letter: bool,
+    pub add_digit: bool,
+    pub add_symbol: bool,
+}
+
+#[derive(Debug)]
 pub struct GeneratePassphraseOutput {
+    pub password: String,
+    pub passphrase: String,
     pub prefixes: Vec<String>,
-    pub passphrase: Vec<String>,
+    pub words: Vec<String>,
     pub cost: i64,
 }
 
 const WORDLIST_ENWIKI: &'static [u8] = include_bytes!("wordlist_enwiki.txt");
 
-pub fn generate_passphrase(passphrase_size: i32) -> io::Result<(GeneratePassphraseOutput)> {
+pub fn generate_passphrase(
+    input: &GeneratePassphraseInput,
+) -> io::Result<(GeneratePassphraseOutput)> {
+    let mut rng = rand::thread_rng();
+    generate_passphrase_internal(input, &mut rng)
+}
+
+pub fn generate_passphrase_internal(
+    input: &GeneratePassphraseInput,
+    rng: &mut impl Rng,
+) -> io::Result<(GeneratePassphraseOutput)> {
     let mut data_file_reader = BufReader::new(WORDLIST_ENWIKI);
 
     let mut number_of_words = String::new();
@@ -46,20 +66,81 @@ pub fn generate_passphrase(passphrase_size: i32) -> io::Result<(GeneratePassphra
     let prefixes: Vec<&String> = prefix_to_words.keys().collect();
     let word_to_index = get_word_to_index(&words);
 
-    let random_prefixes = get_random_prefixes(&prefixes, passphrase_size);
+    let random_prefixes = get_random_prefixes(&prefixes, input.passphrase_length, rng);
     let (random_passphrase, cost) = get_random_passphrase_graph(
         &random_prefixes,
         &prefix_to_words,
         &words,
         &word_to_index,
         &word_to_edges_encoded,
+        rng,
     );
-
+    let password = convert_prefixes_to_password(
+        &random_prefixes,
+        input.add_digit,
+        input.add_capital_letter,
+        input.add_symbol,
+        rng,
+    );
     Ok(GeneratePassphraseOutput {
+        password: password,
+        passphrase: random_passphrase.join(" "),
         prefixes: random_prefixes,
-        passphrase: random_passphrase,
+        words: random_passphrase,
         cost,
     })
+}
+
+fn convert_prefixes_to_password(
+    random_prefixes: &[String],
+    add_digit: bool,
+    add_capital_letter: bool,
+    add_symbol: bool,
+    rng: &mut impl Rng,
+) -> String {
+    let random_digits: Vec<&str> = vec!["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    let random_symbols: Vec<&str> = vec!["@", "#", "$", "&", "%", "!"];
+
+    let mut result = String::with_capacity(32);
+    let number_of_prefixes = random_prefixes.len();
+    let random_elem = rng.gen_range(0, number_of_prefixes);
+    let insert_before_elem = rng.gen_bool(0.5);
+    let random_digit = random_digits[rng.gen_range(0, random_digits.len())];
+    let random_symbol = random_symbols[rng.gen_range(0, random_symbols.len())];
+    let mut random_insertion = String::with_capacity(2);
+    if rng.gen_bool(0.5) {
+        if add_digit {
+            random_insertion.push_str(random_digit);
+        }
+        if add_symbol {
+            random_insertion.push_str(random_symbol);
+        }
+    } else {
+        if add_symbol {
+            random_insertion.push_str(random_symbol);
+        }
+        if add_digit {
+            random_insertion.push_str(random_digit);
+        }
+    }
+    for i in 0..random_prefixes.len() {
+        if i != random_elem {
+            result.push_str(&random_prefixes[i]);
+            continue;
+        }
+        if insert_before_elem {
+            result.push_str(&random_insertion);
+        }
+        if add_capital_letter {
+            result.push_str(&random_prefixes[i].to_uppercase());
+        } else {
+            result.push_str(&random_prefixes[i]);
+        }
+        if !insert_before_elem {
+            result.push_str(&random_insertion);
+        }
+    }
+    result
 }
 
 fn get_random_passphrase_graph(
@@ -68,6 +149,7 @@ fn get_random_passphrase_graph(
     words: &[String],
     word_to_index: &HashMap<String, u32>,
     word_to_edges_encoded: &Vec<Vec<u8>>,
+    rng: &mut impl Rng,
 ) -> (Vec<String>, i64) {
     let mut g = SimpleInMemoryGraph::new();
     let mut start = true;
@@ -141,7 +223,7 @@ fn get_random_passphrase_graph(
     //    println!("first_prefix_words: {:?}", first_prefix_words);
     //    println!("last_prefix_words: {:?}", last_prefix_words);
     let (shortest_path, cost) =
-        shortest_path_multiple(&g, first_prefix_words, last_prefix_words).unwrap();
+        shortest_path_multiple(&g, first_prefix_words, last_prefix_words, rng).unwrap();
     let shortest_path = shortest_path
         .iter()
         .map(|index| words[*index as usize].clone())
@@ -168,11 +250,11 @@ fn get_next_words(
         .collect()
 }
 
-fn get_random_prefixes(prefixes: &Vec<&String>, length: i32) -> Vec<String> {
+fn get_random_prefixes(prefixes: &Vec<&String>, length: i32, rng: &mut impl Rng) -> Vec<String> {
     let mut result: Vec<String> = Vec::with_capacity(length as usize);
     let max = prefixes.len();
     for _ in 0..length {
-        let index: usize = rand::thread_rng().gen_range(0, max);
+        let index: usize = rng.gen_range(0, max);
         result.push(prefixes[index].parse().unwrap());
     }
     result

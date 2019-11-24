@@ -36,6 +36,15 @@ task rustGenerateHeader(type: Exec) {
 
 task rustGenerateIosLibrary(type: Exec) {
     dependsOn(rustBuild)
+    def inputFileTree = fileTree("rust") {
+        include("**/*.rs")
+        include("**/*.toml")
+        include("**/*.txt")
+        include("Cargo.lock")
+        include("Cargo.toml")
+        exclude("target")
+    }
+    inputs.files(inputFileTree.getFiles())
     outputs.files(
         file("rust/target/universal/release/libpasswordgenffi.a")
     )
@@ -67,4 +76,60 @@ task iosCopyRustLibrary(type: Copy) {
 
 task rustIosCopy {
     dependsOn(iosCopyRustLibrary, iosCopyRustHeader)
+}
+
+task rustAndroidAarch64Build(type: Exec) {
+    dependsOn(rustBuild)
+    outputs.dir file("rust/target/aarch64-linux-android/release")
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk', '--target', 'aarch64-linux-android',
+                '--android-platform', '22', '--', 'build', '--release'
+}
+
+task rustAndroidArmv7Build(type: Exec) {
+    dependsOn(rustBuild)
+    outputs.dir file("rust/target/armv7-linux-androideabi/release")
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk', '--target', 'armv7-linux-androideabi',
+                '--android-platform', '22', '--', 'build', '--release'
+}
+
+task rustAndroidi686Build(type: Exec) {
+    dependsOn(rustBuild)
+    outputs.dir file("rust/target/i686-linux-android/release")
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk', '--target', 'i686-linux-android',
+                '--android-platform', '22', '--', 'build', '--release'
+}
+
+task rustAndroidx8664Build(type: Exec) {
+    dependsOn(rustBuild)
+    outputs.dir file("rust/target/x86_64-linux-android/release")
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk', '--target', 'x86_64-linux-android',
+                '--android-platform', '22', '--', 'build', '--release'
+}
+
+
+task rustAndroidBuild {
+    dependsOn(rustAndroidAarch64Build,
+              rustAndroidArmv7Build,
+              rustAndroidi686Build,
+              rustAndroidx8664Build)
+    def inputFileTree = fileTree("rust") {
+        include("**/*.rs")
+        include("**/*.toml")
+        include("**/*.txt")
+        include("Cargo.lock")
+        include("Cargo.toml")
+        exclude("target")
+    }
+    inputs.files(inputFileTree.getFiles())
+}
+
+task all {
+    dependsOn(
+        rustIosCopy,
+        //rustAndroidBuild,
+    )
 }

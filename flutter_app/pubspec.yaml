@@ -71,6 +71,10 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
   fonts:
+    - family: RecursiveMonoLinear
+      fonts:
+        - asset: assets/Recursive-Mono-Linear-Regular.otf
+          weight: 400
     - family: RecursiveMonoCasual
       fonts:
         - asset: assets/Recursive-Mono-Casual-Regular.otf

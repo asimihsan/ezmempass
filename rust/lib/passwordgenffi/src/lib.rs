@@ -1,4 +1,4 @@
-use passwordgen::generate_passphrase;
+use passwordgen::{generate_passphrase, GeneratePassphraseInput};
 use serde::{Deserialize, Serialize};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -7,13 +7,14 @@ use std::os::raw::c_char;
 struct GeneratePassphraseFfiResult {
     password: String,
     passphrase: String,
-    prefixes_elems: Vec<String>,
-    passphrase_elems: Vec<String>,
 }
 
 #[derive(Deserialize)]
 struct GeneratePassphraseFfiInput {
     passphrase_length: i32,
+    add_capital_letter: bool,
+    add_digit: bool,
+    add_symbol: bool,
 }
 
 /// Generate a passphrase
@@ -26,14 +27,16 @@ struct GeneratePassphraseFfiInput {
 pub unsafe extern "C" fn generate_passphrase_ffi(input: *const c_char) -> *mut c_char {
     let input_deser: &str = CStr::from_ptr(input).to_str().unwrap();
     let input_deser: GeneratePassphraseFfiInput = serde_json::from_str(input_deser).unwrap();
-    let passphrase_length = input_deser.passphrase_length;
-
-    let passphrase_result = generate_passphrase(passphrase_length).unwrap();
+    let input = GeneratePassphraseInput {
+        passphrase_length: input_deser.passphrase_length,
+        add_capital_letter: input_deser.add_capital_letter,
+        add_digit: input_deser.add_digit,
+        add_symbol: input_deser.add_symbol,
+    };
+    let passphrase_result = generate_passphrase(&input).unwrap();
     let result = GeneratePassphraseFfiResult {
-        password: passphrase_result.prefixes.join(""),
-        passphrase: passphrase_result.passphrase.join(" "),
-        prefixes_elems: passphrase_result.prefixes,
-        passphrase_elems: passphrase_result.passphrase,
+        password: passphrase_result.password,
+        passphrase: passphrase_result.passphrase,
     };
     let result = serde_json::to_string(&result).unwrap();
     CString::new(result).unwrap().into_raw()

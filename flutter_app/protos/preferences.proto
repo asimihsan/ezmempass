@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Preferences {
+    uint32 passphraseLength = 1;
+    bool addCapitalLetter = 2;
+    bool addDigit = 3;
+    bool addSymbol = 4;
+}

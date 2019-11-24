@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/gen/protos/preferences.pb.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -83,18 +85,35 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    
+
     SharedPreferences.getInstance().then((SharedPreferences sp) {
+      int passphraseLength = 7;
+      bool addCapitalLetter = false;
+      bool addDigit = false;
+      bool addSymbol = false;
+
       sharedPreferences = sp;
       String spSerialized = sharedPreferences.getString("preferences");
-      if (spSerialized == null) {
-        return;
+      if (spSerialized != null) {
+        try {
+          final preferencesBytes = base64.decode(spSerialized);
+          final preferences = Preferences.fromBuffer(preferencesBytes);
+          if (preferences.hasPassphraseLength()) {
+            passphraseLength = preferences.passphraseLength;
+          }
+          if (preferences.hasAddCapitalLetter()) {
+            addCapitalLetter = preferences.addCapitalLetter;
+          }
+          if (preferences.hasAddDigit()) {
+            addDigit = preferences.addDigit;
+          }
+          if (preferences.hasAddSymbol()) {
+            addSymbol = preferences.addSymbol;
+          }
+        } catch (e) {
+          // Any failure to load preferences is OK, we ignore it and set defaults.
+        }
       }
-      final Map<String, dynamic> spDeserialized = jsonDecode(spSerialized);
-      int passphraseLength = spDeserialized["passphrase_length"] ?? 7;
-      bool addCapitalLetter = spDeserialized["add_capital_letter"] ?? false;
-      bool addDigit = spDeserialized["add_digit"] ?? false;
-      bool addSymbol = spDeserialized["add_symbol"] ?? false;
       setState(() {
         _passphraseLength = passphraseLength;
         _addCapitalLetter = addCapitalLetter;
@@ -102,17 +121,19 @@ class _MyHomePageState extends State<MyHomePage> {
         _addSymbol = addSymbol;
       });
       _generatePassphrase();
+      persistPreferences();
     });
   }
 
   void persistPreferences() {
-    final Map<String, dynamic> inputMap = new Map();
-    inputMap["passphrase_length"] = _passphraseLength;
-    inputMap["add_capital_letter"] = _addCapitalLetter;
-    inputMap["add_digit"] = _addDigit;
-    inputMap["add_symbol"] = _addSymbol;
-    final String preferences = jsonEncode(inputMap);
-    sharedPreferences.setString("preferences", preferences);
+    final Preferences preferences = new Preferences();
+    preferences.passphraseLength = _passphraseLength;
+    preferences.addCapitalLetter = _addCapitalLetter;
+    preferences.addDigit = _addDigit;
+    preferences.addSymbol = _addSymbol;
+    final preferencesBytes = preferences.writeToBuffer();
+    final preferencesString = base64.encode(preferencesBytes);
+    sharedPreferences.setString("preferences", preferencesString);
   }
 
   @override

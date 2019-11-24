@@ -1,3 +1,20 @@
+/*
+
+protobuf setup
+
+```
+brew install protobuf swift-protobuf
+flutter pub global activate protoc_plugin
+
+# Add $HOME/flutter/.pub-cache/bin to $PATH, add to ~/.zshrc
+export PATH="$PATH":"$HOME/flutter/.pub-cache/bin"
+
+# Also add in the dart executable, add to ~/.zshrc
+export PATH="$PATH":"$HOME/flutter/bin/cache/dart-sdk/bin"
+```
+
+*/
+
 apply plugin: 'base'
 
 clean {
@@ -6,6 +23,7 @@ clean {
     delete file("flutter_app/build")
     delete file("flutter_app/ios/Runner/passwordgenffi.h")
     delete file("flutter_app/ios/Flutter/libpasswordgenffi.a")
+    delete file("flutter_app/lib/gen")
 }
 
 def rustInputFileTree = fileTree("rust") {
@@ -125,8 +143,20 @@ task rustAndroidBuild {
     inputs.files(rustInputFileTree.getFiles())
 }
 
+task flutterProtobufPreferences(type: Exec) {
+    inputs.dir(
+        file("flutter_app/protos/")
+    )    
+    outputs.dir(
+        file("flutter_app/lib/gen/")
+    )
+    workingDir 'flutter_app'
+    commandLine 'protoc', '--dart_out', './lib/gen', './protos/preferences.proto'
+}
+
 task flutterBuildIos(type: Exec) {
     dependsOn(
+        flutterProtobufPreferences,
         rustIosCopy,
         //rustAndroidBuild,
     )

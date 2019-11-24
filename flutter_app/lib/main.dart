@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -276,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }).toList(growable: false),
     );
     final Widget numberOfWordsContainer = Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 32, 8),
+        padding: const EdgeInsets.fromLTRB(16, 0, 32, 0),
         child: Column(
           children: <Widget>[
             Row(
@@ -309,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     );
     final Widget capitalLetterContainer = Container(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: capitalLetterSwitch
     );
     // ------------------------------------------------------------------------
@@ -378,7 +377,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _generatePassphrase,
         tooltip: 'Generate',
-        child: Icon(Icons.add),
+        child: Icon(Icons.autorenew),
       ),
     );
   }

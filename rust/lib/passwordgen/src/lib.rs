@@ -1,3 +1,4 @@
+use bimap::BiHashMap;
 use std::collections::HashMap;
 use std::io;
 use std::io::{BufRead, BufReader};
@@ -127,48 +128,69 @@ fn convert_prefixes_to_password_and_passphrase(
         }
     }
     for i in 0..random_prefixes.len() {
-        let last_elem = i == random_prefixes.len() - 1;
         if i != random_elem {
             prefixes_result.push_str(&random_prefixes[i]);
             passphrase_result.push_str(&random_passphrase[i]);
-            if !last_elem {
-                passphrase_result.push_str(" ");
-            }
+            passphrase_result.push_str(" ");
             continue;
         }
         if insert_before_elem && random_insertion.len() > 0 {
             prefixes_result.push_str(&random_insertion);
             passphrase_result.push_str(&random_insertion);
-            if !last_elem && random_insertion.len() == 0 {
-                passphrase_result.push_str(" ");
-            }
+            passphrase_result.push_str(" ");
         }
         if add_capital_letter {
             prefixes_result.push_str(&random_prefixes[i].to_uppercase());
             passphrase_result.push_str(&random_passphrase[i].to_uppercase());
-            if !last_elem {
-                passphrase_result.push_str(" ");
-            }
+            passphrase_result.push_str(" ");
         } else {
             prefixes_result.push_str(&random_prefixes[i]);
             passphrase_result.push_str(&random_passphrase[i]);
-            if !last_elem {
-                passphrase_result.push_str(" ");
-            }
+            passphrase_result.push_str(" ");
         }
         if !insert_before_elem && random_insertion.len() > 0 {
             prefixes_result.push_str(&random_insertion);
             passphrase_result.push_str(&random_insertion);
-            if !last_elem {
-                passphrase_result.push_str(" ");
-            }
+            passphrase_result.push_str(" ");
         }
     }
-    (prefixes_result, passphrase_result)
+    (prefixes_result, passphrase_result.trim_end().to_string())
 }
 
+#[derive(Eq, Hash, PartialEq)]
+struct PrefixLevelAndWord {
+    pub level: u32,
+    pub word_index: u32,
+}
+
+type GraphIdentifier = u32;
+
+fn update_prefix_level_bimap(
+    prefix_level_bimap: &mut BiHashMap<PrefixLevelAndWord, GraphIdentifier>,
+    current_graph_id: u32,
+    word_to_index: &HashMap<String, u32>,
+    level: u32,
+    word: &str,
+) -> (u32, u32) {
+    let mut new_graph_id = current_graph_id;
+    let word_id: u32;
+    let p = PrefixLevelAndWord {
+        level,
+        word_index: word_to_index[word],
+    };
+    if !prefix_level_bimap.contains_left(&p) {
+        prefix_level_bimap.insert(p, new_graph_id);
+        word_id = new_graph_id;
+        new_graph_id += 1;
+    } else {
+        word_id = *prefix_level_bimap.get_by_left(&p).unwrap();
+    }
+    (new_graph_id, word_id)
+}
+
+/// TODO wow this is remarkably ugly.
 fn get_random_passphrase_graph(
-    prefixes: &[String],
+    prefixes: &Vec<String>,
     prefix_to_words: &HashMap<String, Vec<String>>,
     words: &[String],
     word_to_index: &HashMap<String, u32>,
@@ -177,10 +199,25 @@ fn get_random_passphrase_graph(
 ) -> (Vec<String>, i64) {
     let mut g = SimpleInMemoryGraph::new();
     let mut start = true;
-    for (prefix1, prefix2) in prefixes.iter().zip(prefixes.iter().skip(1)) {
-        let prefix1_1gram_words = prefix_to_words.get(prefix1).unwrap();
-        let prefix2_1gram_words = prefix_to_words.get(prefix2).unwrap();
+    let mut prefix_level_bimap = BiHashMap::<PrefixLevelAndWord, GraphIdentifier>::new();
+    let mut current_graph_id: u32 = 1;
+    let prefixes_and_levels: Vec<(u32, &String)> = prefixes
+        .iter()
+        .enumerate()
+        .map(|(index, prefix)| (index as u32, prefix))
+        .collect();
+    let last_prefix_level = (prefixes.len() - 1) as u32;
+    for ((prefix1_level, prefix1), (prefix2_level, prefix2)) in prefixes_and_levels
+        .iter()
+        .zip(prefixes_and_levels.iter().skip(1))
+    {
+        let prefix1_1gram_words = prefix_to_words.get(*prefix1).unwrap();
+        let prefix2_1gram_words = prefix_to_words.get(*prefix2).unwrap();
         for prefix1_1gram_word in prefix1_1gram_words {
+            // ----------------------------------------------------------------
+            //  Add prefix1 1gram -> prefix2 2gram edges. These have lower
+            //  weights because we prefer them.
+            // ----------------------------------------------------------------
             for prefix2_2gram_word in &get_next_words(
                 prefix1_1gram_word,
                 prefix2,
@@ -194,23 +231,48 @@ fn get_random_passphrase_graph(
                 } else {
                     -(word_to_index[prefix2_2gram_word] as i64)
                 };
-                g.add_edge(
-                    word_to_index[prefix1_1gram_word],
-                    word_to_index[prefix2_2gram_word],
-                    weight,
+                let (new_graph_id, word1_index) = update_prefix_level_bimap(
+                    &mut prefix_level_bimap,
+                    current_graph_id,
+                    word_to_index,
+                    *prefix1_level,
+                    prefix1_1gram_word,
                 );
-                //                println!(
-                //                    "2gram word1 {} word2 {} weight {}",
-                //                    prefix1_1gram_word, prefix2_2gram_word, weight
-                //                );
+                current_graph_id = new_graph_id;
+                let (new_graph_id, word2_index) = update_prefix_level_bimap(
+                    &mut prefix_level_bimap,
+                    current_graph_id,
+                    word_to_index,
+                    *prefix2_level,
+                    prefix2_2gram_word,
+                );
+                current_graph_id = new_graph_id;
+                g.add_edge(word1_index, word2_index, weight);
             }
+            // ----------------------------------------------------------------
+
+            // ----------------------------------------------------------------
+            //  Add prefix1 1gram -> prefix2 1gram edges.
+            // ----------------------------------------------------------------
             for prefix2_1gram_word in prefix2_1gram_words {
-                if g.get_edge_weight(
-                    word_to_index[prefix1_1gram_word],
-                    word_to_index[prefix2_1gram_word],
-                )
-                .is_none()
-                {
+                let (new_graph_id, word1_index) = update_prefix_level_bimap(
+                    &mut prefix_level_bimap,
+                    current_graph_id,
+                    word_to_index,
+                    *prefix1_level,
+                    prefix1_1gram_word,
+                );
+                current_graph_id = new_graph_id;
+                let (new_graph_id, word2_index) = update_prefix_level_bimap(
+                    &mut prefix_level_bimap,
+                    current_graph_id,
+                    word_to_index,
+                    *prefix2_level,
+                    prefix2_1gram_word,
+                );
+                current_graph_id = new_graph_id;
+
+                if g.get_edge_weight(word1_index, word2_index).is_none() {
                     let weight: i64 = if start {
                         -(word_to_index[prefix1_1gram_word] as i64
                             + word_to_index[prefix2_1gram_word] as i64
@@ -218,17 +280,10 @@ fn get_random_passphrase_graph(
                     } else {
                         -(word_to_index[prefix2_1gram_word] as i64 + ONE_GRAM_INCREMENTAL_COST)
                     };
-                    //                    println!(
-                    //                        "1gram word1 {} word2 {} weight {}",
-                    //                        prefix1_1gram_word, prefix2_1gram_word, weight
-                    //                    );
-                    g.add_edge(
-                        word_to_index[prefix1_1gram_word],
-                        word_to_index[prefix2_1gram_word],
-                        weight,
-                    );
+                    g.add_edge(word1_index, word2_index, weight);
                 }
             }
+            // ----------------------------------------------------------------
             start = false;
         }
     }
@@ -236,21 +291,33 @@ fn get_random_passphrase_graph(
         .get(prefixes.first().unwrap())
         .unwrap()
         .iter()
-        .map(|word| word_to_index[word])
+        .map(|word| PrefixLevelAndWord {
+            level: 0,
+            word_index: word_to_index[word],
+        })
+        .map(|p| *prefix_level_bimap.get_by_left(&p).unwrap())
         .collect();
     let last_prefix_words: Vec<u32> = prefix_to_words
         .get(prefixes.last().unwrap())
         .unwrap()
         .iter()
-        .map(|word| word_to_index[word])
+        .map(|word| PrefixLevelAndWord {
+            level: last_prefix_level,
+            word_index: word_to_index[word],
+        })
+        .map(|p| *prefix_level_bimap.get_by_left(&p).unwrap())
         .collect();
-    //    println!("first_prefix_words: {:?}", first_prefix_words);
-    //    println!("last_prefix_words: {:?}", last_prefix_words);
     let (shortest_path, cost) =
         shortest_path_multiple(&g, first_prefix_words, last_prefix_words, rng).unwrap();
     let shortest_path = shortest_path
         .iter()
-        .map(|index| words[*index as usize].clone())
+        .map(|graph_index| {
+            prefix_level_bimap
+                .get_by_right(graph_index)
+                .unwrap()
+                .word_index
+        })
+        .map(|word_index| words[word_index as usize].clone())
         .collect();
     (shortest_path, cost)
 }

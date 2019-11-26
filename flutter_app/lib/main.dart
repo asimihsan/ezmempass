@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/help_screen.dart';
+import 'package:flutter_app/multiplatform_switch_list_tile.dart';
 import 'package:flutter_app/gen/protos/preferences.pb.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -293,7 +295,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     //  Add capital letter switch
     // ------------------------------------------------------------------------
-    final Widget capitalLetterSwitch = SwitchListTile(
+    final Widget capitalLetterSwitch = MultiPlatformSwitchListTile(
       title: Text(
           'Capital letters',
           style: Theme.of(context).textTheme.headline.copyWith(
@@ -316,7 +318,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     //  Add digit switch
     // ------------------------------------------------------------------------
-    final Widget digitSwitch = SwitchListTile(
+
+    final Widget digitSwitch = MultiPlatformSwitchListTile(
         title: Text(
             'Digit',
             style: Theme.of(context).textTheme.headline.copyWith(
@@ -339,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     //  Add symbol
     // ------------------------------------------------------------------------
-    final Widget symbolSwitch = SwitchListTile(
+    final Widget symbolSwitch = MultiPlatformSwitchListTile(
         title: Text(
             'Symbol',
             style: Theme.of(context).textTheme.headline.copyWith(
@@ -362,6 +365,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(Icons.help),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HelpScreen()),
+            );
+          },
+        ),
       ),
       body: ListView(
         physics: ClampingScrollPhysics(),

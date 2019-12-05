@@ -1,5 +1,5 @@
+use miniserde::{json, Deserialize, Serialize};
 use passwordgen::{generate_passphrase, GeneratePassphraseInput};
-use serde::{Deserialize, Serialize};
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
@@ -26,7 +26,7 @@ struct GeneratePassphraseFfiInput {
 #[no_mangle]
 pub unsafe extern "C" fn generate_passphrase_ffi(input: *const c_char) -> *mut c_char {
     let input_deser: &str = CStr::from_ptr(input).to_str().unwrap();
-    let input_deser: GeneratePassphraseFfiInput = serde_json::from_str(input_deser).unwrap();
+    let input_deser: GeneratePassphraseFfiInput = json::from_str(input_deser).unwrap();
     let input = GeneratePassphraseInput {
         passphrase_length: input_deser.passphrase_length,
         add_capital_letter: input_deser.add_capital_letter,
@@ -38,7 +38,7 @@ pub unsafe extern "C" fn generate_passphrase_ffi(input: *const c_char) -> *mut c
         password: passphrase_result.password,
         passphrase: passphrase_result.passphrase,
     };
-    let result = serde_json::to_string(&result).unwrap();
+    let result = json::to_string(&result);
     CString::new(result).unwrap().into_raw()
 }
 

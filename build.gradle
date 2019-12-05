@@ -24,6 +24,9 @@ clean {
     delete file("flutter_app/ios/Runner/passwordgenffi.h")
     delete file("flutter_app/ios/Flutter/libpasswordgenffi.a")
     delete file("flutter_app/lib/gen")
+    delete file("flutter_app/ios/.symlinks")
+    delete file("flutter_app/.packages")
+    delete file("flutter_app/.flutter-plugins")
 }
 
 def rustInputFileTree = fileTree("rust") {
@@ -154,8 +157,19 @@ task flutterProtobufPreferences(type: Exec) {
     commandLine 'protoc', '--dart_out', './lib/gen', './protos/preferences.proto'
 }
 
+task flutterPubGet(type: Exec) {
+    inputs.files(flutterInputFileTree.getFiles())
+    outputs.files(
+        file("flutter_app/.packages"),
+        file("flutter_app/.flutter-plugins")
+    )
+    workingDir 'flutter_app'
+    commandLine 'flutter', 'pub', 'get'
+}
+
 task flutterBuildIos(type: Exec) {
     dependsOn(
+        flutterPubGet,
         flutterProtobufPreferences,
         rustIosCopy,
         //rustAndroidBuild,

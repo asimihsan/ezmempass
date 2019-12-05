@@ -72,8 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       inputMap["add_digit"] = _addDigit;
       inputMap["add_symbol"] = _addSymbol;
       final String input = jsonEncode(inputMap);
-      final String result = await platform.invokeMethod(
-          'generatePassphrase', {"input": input});
+      final String result = await platform.invokeMethod('generatePassphrase', {"input": input});
       final Map<String, dynamic> resultDeser = jsonDecode(result);
       password = resultDeser['password'];
       passphrase = resultDeser['passphrase'];
@@ -85,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _passphrase = passphrase;
     });
   }
-  
+
   @override
   void initState() {
     super.initState();
@@ -158,16 +157,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget passwordLabel = Text(
       "Password",
-      style: Theme.of(context).textTheme.headline.copyWith(
-          fontFamily: 'RecursiveSansLinear'),
+      style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
     );
     final Widget passwordValue = Expanded(
-      child: SelectableText(
-        _password,
-        style: Theme.of(context).textTheme.title.copyWith(
-            fontFamily: 'RecursiveMonoLinear'),
-      )
-    );
+        child: Text(
+      _password,
+      style: Theme.of(context).textTheme.title.copyWith(fontFamily: 'RecursiveMonoLinear'),
+      key: Key('password'),
+    ));
     final Widget passwordValueCopyButton = IconButton(
       icon: shareIcon,
       alignment: Alignment.topCenter,
@@ -186,14 +183,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             Row(
-              children: <Widget>[
-                passwordValue,
-                passwordValueCopyButton
-              ],
+              children: <Widget>[passwordValue, passwordValueCopyButton],
             )
           ],
-        )
-    );
+        ));
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
@@ -201,16 +194,13 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget passphraseLabel = Text(
       "Memory aid",
-      style: Theme.of(context).textTheme.headline.copyWith(
-          fontFamily: 'RecursiveSansLinear'),
+      style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
     );
     final Widget passphraseValue = Expanded(
-      child: SelectableText(
-        _passphrase,
-        style: Theme.of(context).textTheme.title.copyWith(
-            fontFamily: 'RecursiveMonoLinear'),
-      )
-    );
+        child: Text(
+      _passphrase,
+      style: Theme.of(context).textTheme.title.copyWith(fontFamily: 'RecursiveMonoLinear'),
+    ));
     final Widget passphraseValueCopyButton = IconButton(
       icon: shareIcon,
       alignment: Alignment.topCenter,
@@ -229,14 +219,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             Row(
-              children: <Widget>[
-                passphraseValue,
-                passphraseValueCopyButton
-              ],
+              children: <Widget>[passphraseValue, passphraseValueCopyButton],
             )
           ],
-        )
-    );
+        ));
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
@@ -244,16 +230,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     final Widget numberOfWordsLabel = Text(
       "Number of words",
-      style: Theme.of(context).textTheme.headline.copyWith(
-          fontFamily: 'RecursiveSansLinear'),
+      style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
     );
     final numberOfWordsSelector = DropdownButton<int>(
       value: _passphraseLength,
       icon: Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
-      style: Theme.of(context).textTheme.headline.copyWith(
-          fontFamily: 'RecursiveSansLinear'),
+      style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
       underline: Container(
         height: 2,
         color: Colors.grey,
@@ -268,8 +252,8 @@ class _MyHomePageState extends State<MyHomePage> {
         _generatePassphrase();
         persistPreferences();
       },
-      items: <int>[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                   21, 22, 23, 24].map<DropdownMenuItem<int>>((int value) {
+      items: <int>[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+          .map<DropdownMenuItem<int>>((int value) {
         return DropdownMenuItem<int>(
           value: value,
           child: Text(value.toString()),
@@ -288,31 +272,26 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ],
-        )
-    );
+        ));
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     //  Add capital letter switch
     // ------------------------------------------------------------------------
     final Widget capitalLetterSwitch = MultiPlatformSwitchListTile(
-      title: Text(
-          'Capital letters',
-          style: Theme.of(context).textTheme.headline.copyWith(
-              fontFamily: 'RecursiveSansLinear')),
-      value: _addCapitalLetter,
-      onChanged: (bool value) {
-        setState(() {
-          _addCapitalLetter = value;
+        title: Text('Capital letters',
+            style:
+                Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+        value: _addCapitalLetter,
+        onChanged: (bool value) {
+          setState(() {
+            _addCapitalLetter = value;
+          });
+          _generatePassphrase();
+          persistPreferences();
         });
-        _generatePassphrase();
-        persistPreferences();
-      }
-    );
-    final Widget capitalLetterContainer = Container(
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-      child: capitalLetterSwitch
-    );
+    final Widget capitalLetterContainer =
+        Container(padding: const EdgeInsets.fromLTRB(0, 8, 0, 0), child: capitalLetterSwitch);
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
@@ -320,10 +299,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
 
     final Widget digitSwitch = MultiPlatformSwitchListTile(
-        title: Text(
-            'Digit',
-            style: Theme.of(context).textTheme.headline.copyWith(
-                fontFamily: 'RecursiveSansLinear')),
+        title: Text('Digit',
+            style:
+                Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
         value: _addDigit,
         onChanged: (bool value) {
           setState(() {
@@ -331,22 +309,18 @@ class _MyHomePageState extends State<MyHomePage> {
           });
           _generatePassphrase();
           persistPreferences();
-        }
-    );
-    final Widget digitContainer = Container(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        child: digitSwitch
-    );
+        });
+    final Widget digitContainer =
+        Container(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: digitSwitch);
     // ------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
     //  Add symbol
     // ------------------------------------------------------------------------
     final Widget symbolSwitch = MultiPlatformSwitchListTile(
-        title: Text(
-            'Symbol',
-            style: Theme.of(context).textTheme.headline.copyWith(
-                fontFamily: 'RecursiveSansLinear')),
+        title: Text('Symbol',
+            style:
+                Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
         value: _addSymbol,
         onChanged: (bool value) {
           setState(() {
@@ -354,12 +328,9 @@ class _MyHomePageState extends State<MyHomePage> {
           });
           _generatePassphrase();
           persistPreferences();
-        }
-    );
-    final Widget symbolContainer = Container(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        child: symbolSwitch
-    );
+        });
+    final Widget symbolContainer =
+        Container(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: symbolSwitch);
     // ------------------------------------------------------------------------
 
     return Scaffold(
@@ -390,6 +361,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _generatePassphrase,
         tooltip: 'Generate',
         child: Icon(Icons.autorenew),
+        key: Key('generate'),
       ),
     );
   }

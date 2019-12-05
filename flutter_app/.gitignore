@@ -66,6 +66,7 @@
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/libpasswordgenffi.a
 **/ios/Runner/passwordgenffi.h
+ios/.symlinks/
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

@@ -12,8 +12,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 passwordgen = { path = "../passwordgen" }
-serde = { version = "1.0.102", features = ["derive"] }
-serde_json = "1.0.41"
+miniserde = "0.1.12"
 
 # this dependency is only needed for Android.
 [target.'cfg(target_os = "android")'.dependencies]

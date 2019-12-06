@@ -41,6 +41,9 @@ def rustInputFileTree = fileTree("rust") {
 def flutterInputFileTree = fileTree("flutter_app") {
     exclude("build")
     exclude("*.iml")
+    exclude(".packages")
+    exclude(".flutter-plugins")
+    exclude("ios/.symlinks")
 }
 
 task rustBuild(type: Exec) {
@@ -175,9 +178,9 @@ task flutterBuildIos(type: Exec) {
         //rustAndroidBuild,
     )
     inputs.files(flutterInputFileTree.getFiles())
-    outputs.dir file("flutter_app/build")
+    outputs.dir file("flutter_app/build/ios/iphoneos")
     workingDir 'flutter_app'
-    commandLine 'flutter', 'build', 'ios', '--simulator'
+    commandLine 'flutter', 'build', 'ios'
 }
 
 task flutterBuild {
@@ -204,4 +207,15 @@ task backup(type: Zip) {
     }
     zip64 true
     reproducibleFileOrder true
+}
+
+task ensureIosSimulatorRunning(type: Exec) {
+    workingDir 'flutter_app'
+    commandLine 'open', '-a', 'Simulator', '-g'
+}
+
+task iosIntegrationTest(type: Exec) {
+    dependsOn(ensureIosSimulatorRunning, flutterBuildIos)
+    workingDir 'flutter_app'
+    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/app.dart'
 }

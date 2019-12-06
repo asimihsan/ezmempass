@@ -58,21 +58,13 @@ export PATH="${PATH}":"${HOME}"/flutter/bin/cache/dart-sdk/bin/
 
 ### Setup
 
--   Until this is properly version controlled in Git, delete the following dirs and files
-    -   `flutter_app/ios/.symlinks`
-    -   `flutter_app/.packages`
-    -   `flutter_app/.flutter-plugins`
--   (Is this needed?) from the root of `flutter_app` run:
-
-```
-flutter pub get
-```
-
--   Finally you can run the root build step:
+-   Finally you can run the root build step, clean then build all.
 
 ```
 ./gradlew clean all
 ```
+
+-   Subsequent builds you just need to do `all`.
 
 ### Running on real iOS device
 

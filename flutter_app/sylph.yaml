@@ -1,0 +1,45 @@
+# Config file for Flutter tests on real device pools.
+# Auto-creates projects and device pools if needed.
+# Configures android and ios test runs.
+# Builds app, uploads and runs tests.
+# Then monitors tests, returns final pass/fail result and downloads artifacts.
+# Note: assumes the 'aws' command line utility is logged-in.
+# Note: to build the debug iOS app, certain environment variables are required.
+#
+# Prerequisites
+# - `sudo gem install xcpretty`
+#
+# References:
+# - https://github.com/mmcc007/sylph
+
+# sylph config
+tmp_dir: /tmp/sylph
+artifacts_dir: /tmp/sylph_artifacts
+# local timeout per device farm run
+sylph_timeout: 900 # seconds approx
+# run on ios and android pools concurrently (for faster results)
+concurrent_runs: true
+
+# device farm config
+project_name: EzMemPass
+default_job_timeout: 15 # minutes, set at project creation
+
+device_pools:
+  - pool_name: iOS Pool 1
+    pool_type: ios
+    devices:
+      - name: Apple iPhone 11
+        model: MWL72LL/A
+        os: 13.1.3
+      - name: Apple iPhone 6
+        model: A1549
+        os: 9.2.1
+
+test_suites:
+  - test_suite: Integration Tests
+    main: test_driver/main.dart
+    tests:
+      - test_driver/main_test.dart
+    pool_names:
+      - iOS Pool 1
+    job_timeout: 15 # minutes, set per job, over-rides default job timeout above

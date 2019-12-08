@@ -70,3 +70,10 @@ export PATH="${PATH}":"${HOME}"/flutter/bin/cache/dart-sdk/bin/
 
 -   From Android Studio, open the `ios\Runner\AppDelete.swift` file. This will reveal a link to "Open iOS module in Xcode", click that link.
 -   If this is a fresh Catalina install there will be a lot of security warnings. Go to the Security preferences and allow all the executables flutter wants to run.
+
+## Using Sylph to run on AWS Device Farm
+
+```
+export AWS_PROFILE=ezmempass
+export TEAM_ID=UGL649EE6W
+```

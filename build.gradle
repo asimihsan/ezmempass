@@ -228,5 +228,5 @@ task ensureIosSimulatorRunning(type: Exec) {
 task iosIntegrationTest(type: Exec) {
     dependsOn(ensureIosSimulatorRunning, flutterBuildIos)
     workingDir 'flutter_app'
-    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/app.dart'
+    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/main.dart'
 }

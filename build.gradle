@@ -15,7 +15,12 @@ export PATH="$PATH":"$HOME/flutter/bin/cache/dart-sdk/bin"
 
 */
 
-// TODO Why do my iOS and Android builds for ARMv7 (32-bit) fail for the Rust library?
+/* TODO
+-   Why can I only get Android builds of Rust working for SDK 23? find_symbols.sh says pthread_atfork() present for
+    older SDKs.
+-   Can I get ARM 32-bit working for Rust on iOS builds?
+
+*/
 
 apply plugin: 'base'
 
@@ -34,7 +39,6 @@ clean {
     doLast {
         ant.mkdir(dir: "rust/target")
         ant.touch(file: "rust/target/.do-not-backup-directory")
-        ant.touch(file: "rust/NDK/.do-not-backup-directory")
         ant.mkdir(dir: "flutter_app/build")
         ant.touch(file: "flutter_app/build/.do-not-backup-directory")
         ant.mkdir(dir: "flutter_app/ios/build")
@@ -99,7 +103,21 @@ task rustGenerateAndroidAarch64(type: Exec) {
     workingDir 'rust'
     commandLine 'cargo', 'ndk',
         '--target', 'aarch64-linux-android',
-        '--android-platform', "21", 
+        '--android-platform', "23", 
+        '--',
+        'build', '--release'
+}
+
+task rustGenerateAndroidArm(type: Exec) {
+    dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
+    outputs.files(
+        file("rust/target/armv7-linux-androideabi/release/libpasswordgenffi.so")
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk',
+        '--target', 'armv7-linux-androideabi',
+        '--android-platform', "23", 
         '--',
         'build', '--release'
 }
@@ -113,7 +131,7 @@ task rustGenerateAndroidi686(type: Exec) {
     workingDir 'rust'
     commandLine 'cargo', 'ndk',
         '--target', 'i686-linux-android',
-        '--android-platform', "21", 
+        '--android-platform', "23", 
         '--',
         'build', '--release'
 }
@@ -127,7 +145,7 @@ task rustGenerateAndroidx8664(type: Exec) {
     workingDir 'rust'
     commandLine 'cargo', 'ndk',
         '--target', 'x86_64-linux-android',
-        '--android-platform', "21", 
+        '--android-platform', "23", 
         '--',
         'build', '--release'
 }
@@ -137,6 +155,13 @@ task androidCopyAarch64(type: Copy) {
     inputs.files(rustInputFileTree.getFiles())
     from "rust/target/aarch64-linux-android/release/libpasswordgenffi.so"
     into "flutter_app/android/app/src/main/jniLibs/arm64-v8a/"
+}
+
+task androidCopyArm(type: Copy) {
+    dependsOn(rustGenerateAndroidArm)
+    inputs.files(rustInputFileTree.getFiles())
+    from "rust/target/armv7-linux-androideabi/release/libpasswordgenffi.so"
+    into "flutter_app/android/app/src/main/jniLibs/armeabi-v7a/"
 }
 
 task androidCopyi686(type: Copy) {
@@ -220,11 +245,12 @@ task flutterBuildIos(type: Exec) {
         '--no-pub'
 }
 
-task flutterBuildAndroid(type: Exec) {
+task flutterBuildAndroidFatApk(type: Exec) {
     dependsOn(
         flutterPubGet,
         flutterProtobufPreferences,
         androidCopyAarch64,
+        androidCopyArm,
         androidCopyi686,
         androidCopyx8664,
     )
@@ -233,14 +259,14 @@ task flutterBuildAndroid(type: Exec) {
     workingDir 'flutter_app'
     commandLine 'flutter', 'build', 'apk',
         '--debug',
-        '--target-platform', 'android-arm64,android-x86,android-x64',
+        '--target-platform', 'android-arm64,android-arm,android-x86,android-x64',
         '--no-pub'
 }
 
 task flutterBuild {
     dependsOn(
         flutterBuildIos,
-        flutterBuildAndroid
+        flutterBuildAndroidFatApk
     )
 }
 

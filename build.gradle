@@ -234,8 +234,7 @@ task flutterBuildAndroid(type: Exec) {
     commandLine 'flutter', 'build', 'apk',
         '--debug',
         '--target-platform', 'android-arm64,android-x86,android-x64',
-        '--no-pub',        
-        '--split-per-abi'
+        '--no-pub'
 }
 
 task flutterBuild {

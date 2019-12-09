@@ -15,6 +15,8 @@ export PATH="$PATH":"$HOME/flutter/bin/cache/dart-sdk/bin"
 
 */
 
+// TODO Why do my iOS and Android builds for ARMv7 (32-bit) fail for the Rust library?
+
 apply plugin: 'base'
 
 clean {
@@ -23,6 +25,7 @@ clean {
     delete file("flutter_app/build")
     delete file("flutter_app/ios/Runner/passwordgenffi.h")
     delete file("flutter_app/ios/Flutter/libpasswordgenffi.a")
+    delete file("flutter_app/android/app/src/main/jniLibs")
     delete file("flutter_app/lib/gen")
     delete file("flutter_app/ios/.symlinks")
     delete file("flutter_app/ios/build")
@@ -31,12 +34,15 @@ clean {
     doLast {
         ant.mkdir(dir: "rust/target")
         ant.touch(file: "rust/target/.do-not-backup-directory")
+        ant.touch(file: "rust/NDK/.do-not-backup-directory")
         ant.mkdir(dir: "flutter_app/build")
         ant.touch(file: "flutter_app/build/.do-not-backup-directory")
         ant.mkdir(dir: "flutter_app/ios/build")
         ant.touch(file: "flutter_app/ios/build/.do-not-backup-directory")
         ant.mkdir(dir: "build")
         ant.touch(file: "build/.do-not-backup-directory")
+        ant.mkdir(dir: "flutter_app/android/app/src/main/jniLibs")
+        ant.touch(file: "flutter_app/android/app/src/main/jniLibs/.do-not-backup-directory")
     }
 }
 
@@ -84,6 +90,69 @@ task rustGenerateIosLibrary(type: Exec) {
     commandLine 'cargo', 'lipo', '--release'
 }
 
+task rustGenerateAndroidAarch64(type: Exec) {
+    dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
+    outputs.files(
+        file("rust/target/aarch64-linux-android/release/libpasswordgenffi.so")
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk',
+        '--target', 'aarch64-linux-android',
+        '--android-platform', "21", 
+        '--',
+        'build', '--release'
+}
+
+task rustGenerateAndroidi686(type: Exec) {
+    dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
+    outputs.files(
+        file("rust/target/i686-linux-android/release/libpasswordgenffi.so")
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk',
+        '--target', 'i686-linux-android',
+        '--android-platform', "21", 
+        '--',
+        'build', '--release'
+}
+
+task rustGenerateAndroidx8664(type: Exec) {
+    dependsOn(rustBuild)
+    inputs.files(rustInputFileTree.getFiles())
+    outputs.files(
+        file("rust/target/x86_64-linux-android/release/libpasswordgenffi.so")
+    )
+    workingDir 'rust'
+    commandLine 'cargo', 'ndk',
+        '--target', 'x86_64-linux-android',
+        '--android-platform', "21", 
+        '--',
+        'build', '--release'
+}
+
+task androidCopyAarch64(type: Copy) {
+    dependsOn(rustGenerateAndroidAarch64)
+    inputs.files(rustInputFileTree.getFiles())
+    from "rust/target/aarch64-linux-android/release/libpasswordgenffi.so"
+    into "flutter_app/android/app/src/main/jniLibs/arm64-v8a/"
+}
+
+task androidCopyi686(type: Copy) {
+    dependsOn(rustGenerateAndroidi686)
+    inputs.files(rustInputFileTree.getFiles())
+    from "rust/target/i686-linux-android/release/libpasswordgenffi.so"
+    into "flutter_app/android/app/src/main/jniLibs/x86/"
+}
+
+task androidCopyx8664(type: Copy) {
+    dependsOn(rustGenerateAndroidx8664)
+    inputs.files(rustInputFileTree.getFiles())
+    from "rust/target/x86_64-linux-android/release/libpasswordgenffi.so"
+    into "flutter_app/android/app/src/main/jniLibs/x86_64/"
+}
+
 task rustCopyIosLibraryToBuild(type: Copy) {
     dependsOn(rustGenerateIosLibrary)
     inputs.files(rustInputFileTree.getFiles())
@@ -115,50 +184,7 @@ task rustIosCopy {
     inputs.files(rustInputFileTree.getFiles())
 }
 
-task rustAndroidAarch64Build(type: Exec) {
-    dependsOn(rustBuild)
-    inputs.files(rustInputFileTree.getFiles())
-    outputs.dir file("rust/target/aarch64-linux-android/release")
-    workingDir 'rust'
-    commandLine 'cargo', 'ndk', '--target', 'aarch64-linux-android',
-                '--android-platform', '22', '--', 'build', '--release'
-}
 
-task rustAndroidArmv7Build(type: Exec) {
-    dependsOn(rustBuild)
-    inputs.files(rustInputFileTree.getFiles())
-    outputs.dir file("rust/target/armv7-linux-androideabi/release")
-    workingDir 'rust'
-    commandLine 'cargo', 'ndk', '--target', 'armv7-linux-androideabi',
-                '--android-platform', '22', '--', 'build', '--release'
-}
-
-task rustAndroidi686Build(type: Exec) {
-    dependsOn(rustBuild)
-    inputs.files(rustInputFileTree.getFiles())
-    outputs.dir file("rust/target/i686-linux-android/release")
-    workingDir 'rust'
-    commandLine 'cargo', 'ndk', '--target', 'i686-linux-android',
-                '--android-platform', '22', '--', 'build', '--release'
-}
-
-task rustAndroidx8664Build(type: Exec) {
-    dependsOn(rustBuild)
-    inputs.files(rustInputFileTree.getFiles())
-    outputs.dir file("rust/target/x86_64-linux-android/release")
-    workingDir 'rust'
-    commandLine 'cargo', 'ndk', '--target', 'x86_64-linux-android',
-                '--android-platform', '22', '--', 'build', '--release'
-}
-
-
-task rustAndroidBuild {
-    dependsOn(rustAndroidAarch64Build,
-              rustAndroidArmv7Build,
-              rustAndroidi686Build,
-              rustAndroidx8664Build)
-    inputs.files(rustInputFileTree.getFiles())
-}
 
 task flutterProtobufPreferences(type: Exec) {
     inputs.dir(
@@ -185,18 +211,37 @@ task flutterBuildIos(type: Exec) {
     dependsOn(
         flutterPubGet,
         flutterProtobufPreferences,
-        rustIosCopy,
-        //rustAndroidBuild,
+        rustIosCopy
     )
     inputs.files(flutterInputFileTree.getFiles())
     outputs.dir file("flutter_app/build/ios/iphoneos")
     workingDir 'flutter_app'
-    commandLine 'flutter', 'build', 'ios'
+    commandLine 'flutter', 'build', 'ios',
+        '--no-pub'
+}
+
+task flutterBuildAndroid(type: Exec) {
+    dependsOn(
+        flutterPubGet,
+        flutterProtobufPreferences,
+        androidCopyAarch64,
+        androidCopyi686,
+        androidCopyx8664,
+    )
+    inputs.files(flutterInputFileTree.getFiles())
+    outputs.dir file("flutter_app/build/app/outputs/apk")
+    workingDir 'flutter_app'
+    commandLine 'flutter', 'build', 'apk',
+        '--debug',
+        '--target-platform', 'android-arm64,android-x86,android-x64',
+        '--no-pub',        
+        '--split-per-abi'
 }
 
 task flutterBuild {
     dependsOn(
         flutterBuildIos,
+        flutterBuildAndroid
     )
 }
 

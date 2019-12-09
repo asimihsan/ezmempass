@@ -54,3 +54,6 @@ pub unsafe extern "C" fn generate_passphrase_ffi_release(result: *mut c_char) {
     }
     CString::from_raw(result);
 }
+
+#[cfg(target_os = "android")]
+mod android;

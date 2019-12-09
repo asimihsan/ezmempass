@@ -8,7 +8,7 @@ edition = "2018"
 
 [lib]
 name = "passwordgenffi"
-crate-type = ["staticlib"]
+crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
 passwordgen = { path = "../passwordgen" }

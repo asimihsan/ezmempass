@@ -13,8 +13,14 @@ Strong, easy to memorize passwords.
 -   Install Jetbrains Toolbox. Then within that install
     -   Android Studio
     -   (optional, costs money) CLion
+-   Launch Android Studio, and install the Android SDK.
 -   Install Flutter to the `$HOME/flutter` directory (your home directory): https://flutter.dev/docs/get-started/install
 -   Ensure `flutter doctor` eventually runs without warnings or errors, follow its instructions.
+-   Set up the Android NDK
+    -   Download the ZIP file from https://developer.android.com/ndk/downloads/
+    -   When you run `flutter doctor -v`, you will find out where the Android SDK is. For me it's at `/Users/asimi/Library/Android/sdk`
+    -   Extract the ZIP file to a folder into a `ndk-bundle` subfolder, e.g. `/Users/asimi/Library/Android/sdk/ndk-bundle`
+    -   Update your shell config e.g. `~/.zshrc` to include `export NDK_HOME=$HOME/Library/Android/sdk/ndk-bundle`, the path to your `ndk-bundle`
 -   Install Rust: https://www.rust-lang.org/tools/install
 -   Install the `cargo-lipo` Rust crate that lets you build Rust libraries for iOS:
 
@@ -68,7 +74,13 @@ export PATH="${PATH}":"${HOME}"/flutter/bin/cache/dart-sdk/bin/
 ./gradlew clean all
 ```
 
+-   If this command fails some part of the setup doesn't work. We can iterate on the setup to improve it.
 -   Subsequent builds you just need to do `all`.
+
+### Troubleshooting
+
+-   I don't think iOS builds to a device will work until you have the provisioning profile for `com.ezmempass.EzMemPass`
+    -   TODO figure out how to share this.
 
 ### Running on real iOS device
 

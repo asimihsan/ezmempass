@@ -1,0 +1,9 @@
+{
+    "default": true,
+    "list-marker-space": false,
+    "fenced-code-language": false,
+    "ul-indent": {
+        "indent": 4
+    },
+    "line-length": false
+}

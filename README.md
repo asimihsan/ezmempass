@@ -4,7 +4,7 @@ Strong, easy to memorize passwords.
 
 ## What problem does this project solve?
 
-Passwords are important and, for better or worse, aren't going anywhere. The best way of dealing with passwords is to use a password manager like 1Password to store random, unique passwords for each website, and then a single very strong password for the password maanager. However there are two issues with this.
+Passwords are important and, for better or worse, aren't going anywhere. The best way of dealing with passwords is to use a password manager like 1Password to store random, unique passwords for each website, and then a single very strong password for the password manager. However there are two issues with this.
 
 Firstly, what password do you choose for your password manager? Ultimately there must be a password somewhere. It is true that you could store a complex password on a device like a smart card, but then something "you have" like a smart card has different security and legal properties to something "you know" like a password.
 
@@ -12,24 +12,27 @@ Secondly, there are some Internet accounts that are so important, like email add
 
 You will always need a small handful of strong passwords, i.e. passwords that are essentially impossible for an attacker to guess via brute force. However such passwords are very difficult to memorize. Based on my personal experience, strong passwords based on random characters take around 5 days to memorize if you use the password at least 3 times a day.
 
-What if there was a way of creating passwords that were slightly longer and much easier to remember, but just as strong as a password made up of random characters? The scheme I descrieb below generates passwords that, based on my personal experience, take around 1-2 days to memorize.
+What if there was a way of creating passwords that were slightly longer and much easier to remember, but just as strong as a password made up of random characters? The scheme I describe below generates passwords that, based on my personal experience, take around 1-2 days to memorize.
 
 ## What is the proposed way of generating passwords?
 
 First we need data:
 
--   Obtain a very large body of text in a given language, e.g. English. A Wikipedia cirrussearch dump is very handy here.
+-   Obtain a very large body of text in a given language, e.g. English. A [Wikipedia cirrussearch dump](https://dumps.wikimedia.org/other/cirrussearch/) is very handy here.
 -   Come up with a way of iterating over all words in the body of text.
--   Determine the 1024 most popular three-letter prefixes across all words. This is the first pass.
--   Determine the 100,000 most popular words that begin with one of those 1024 three-letter prefixes (i.e. get unigram statistics). This is the second pass.
--   For each of the most popular words, track the frequence with which another of the most popular words occurs (i.e. get bigram statistics). This is the third pass.
+-   Determine the 100,000 most popular words in the data set that are also in a very large dictionary. This is the first pass.
+-   Determine the 1024 most popular three-letter prefixes across the top 100,000 words. This is the second pass.
+-   For each of the most popular words that also begins with one of the 1024 three-letter prefixes, track the frequence with which another of the most popular words occurs (i.e. get bigram statistics). This is the third pass.
+-   Store
+    -   The subset of the 100,000 most popular words that also begin with one of the 1024 most popular three-letter prefixes. This is around 54,000 words in English.
+    -   For these 54,000 words, the bigram information.
 
 Given this data and language model, we can generate strong relatively easy-to-memorize passwords:
 
 -   Choose K three-letter prefixes at random.
 -   Try to come up with a "plausible" sequence of words that match all of the three-letter prefixes.
 
-The strength / entropy of this password is `8 * log_2(1024)` = `8 * 10` = `80` bits. As of 2019 this is exceptionally strong. Moreover the phrase isn't a list of completely random words, instead we try to come up something that makes a little sense.
+The strength / entropy of this password is `8 * log_2(1024)` = `8 * 10` = `80` bits. As of 2019 this is a strong password. Moreover the phrase isn't a list of completely random words, instead we try to come up something that makes a little sense.
 
 ## What is the proposed technical solution?
 

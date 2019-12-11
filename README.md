@@ -73,6 +73,12 @@ If you're on Mac you can build the Rust + Android + iOS parts of this project.
 cargo install cargo-lipo
 ```
 
+-   Install the `cargo-ndk` Rust crate that lets you build Rust libraries for Android:
+
+```
+cargo install cargo-ndk
+```
+
 -   Install the `cbindgen` Rust crate that lets you create C header files quickly.
 
 ```

@@ -5,6 +5,7 @@ edges
 
 use priority_queue::PriorityQueue;
 use rand::Rng;
+use std::cmp::min;
 use std::collections::{hash_set, HashMap, HashSet};
 
 /// Graph trait that allows algorithms to be applied.
@@ -81,7 +82,7 @@ fn get_weighted_random_index(max: usize, rng: &mut impl Rng) -> usize {
     rng.gen_range(0, hi) as usize
 }
 
-/// Returns shortest path from multiple start nodes to multiple goal nodes.
+/// Returns shortest path from multiple start nodes to multiple goal nodes and the associated cost.
 pub fn shortest_path_multiple(
     graph: &impl Graph,
     starts: Vec<u32>,
@@ -116,9 +117,21 @@ pub fn shortest_path_multiple(
     const MAX_ITERS: i32 = 100;
     let starts_len = starts.len();
     let goals_len = goals.len();
-    while i < MAX_ITERS {
+    if starts_len == 0 || goals_len == 0 {
+        return None;
+    }
+    let mut seen_starts_goals: HashSet<(u32, u32)> =
+        HashSet::with_capacity(min(starts_len * goals_len, 100));
+    while i <= MAX_ITERS {
+        i += 1;
         let start = starts[get_weighted_random_index(starts_len, rng)];
         let goal = goals[get_weighted_random_index(goals_len, rng)];
+        let key = (start, goal);
+        if seen_starts_goals.contains(&key) {
+            continue;
+        }
+        seen_starts_goals.insert(key);
+
         match shortest_path(graph, start, goal) {
             None => continue,
             Some((path, cost)) => {
@@ -129,7 +142,6 @@ pub fn shortest_path_multiple(
                 }
             }
         }
-        i += 1;
         //        if i % 100 == 0 {
         //            println!(
         //                "current best path {:?} cost {}",

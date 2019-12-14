@@ -1,12 +1,12 @@
 use bimap::BiHashMap;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io;
 use std::io::{BufRead, BufReader};
 use std::str::FromStr;
 
 use rand::Rng;
 
-use graph::{shortest_path_multiple, Graph, SimpleInMemoryGraph};
+use graph::{shortest_path_multiple, SimpleInMemoryGraph};
 use integer_coding::DeltaDecoder;
 
 const ONE_GRAM_INCREMENTAL_COST: i64 = 1_000_000;
@@ -197,7 +197,8 @@ fn get_random_passphrase_graph(
     word_to_edges_encoded: &Vec<Vec<u8>>,
     rng: &mut impl Rng,
 ) -> (Vec<String>, i64) {
-    let mut g = SimpleInMemoryGraph::new();
+    let mut g: SimpleInMemoryGraph = Default::default();
+    let mut is_edge_added: HashSet<(u32, u32)> = HashSet::new();
     let mut start = true;
     let mut prefix_level_bimap = BiHashMap::<PrefixLevelAndWord, GraphIdentifier>::new();
     let mut current_graph_id: u32 = 1;
@@ -226,10 +227,10 @@ fn get_random_passphrase_graph(
                 word_to_edges_encoded,
             ) {
                 let weight: i64 = if start {
-                    -(word_to_index[prefix1_1gram_word] as i64
-                        + word_to_index[prefix2_2gram_word] as i64)
+                    word_to_index[prefix1_1gram_word] as i64
+                        + word_to_index[prefix2_2gram_word] as i64
                 } else {
-                    -(word_to_index[prefix2_2gram_word] as i64)
+                    word_to_index[prefix2_2gram_word] as i64
                 };
                 let (new_graph_id, word1_index) = update_prefix_level_bimap(
                     &mut prefix_level_bimap,
@@ -248,6 +249,7 @@ fn get_random_passphrase_graph(
                 );
                 current_graph_id = new_graph_id;
                 g.add_edge(word1_index, word2_index, weight);
+                is_edge_added.insert((word1_index, word2_index));
             }
             // ----------------------------------------------------------------
 
@@ -272,15 +274,16 @@ fn get_random_passphrase_graph(
                 );
                 current_graph_id = new_graph_id;
 
-                if g.get_edge_weight(word1_index, word2_index).is_none() {
+                if is_edge_added.get(&(word1_index, word2_index)).is_none() {
                     let weight: i64 = if start {
-                        -(word_to_index[prefix1_1gram_word] as i64
+                        word_to_index[prefix1_1gram_word] as i64
                             + word_to_index[prefix2_1gram_word] as i64
-                            + ONE_GRAM_INCREMENTAL_COST)
+                            + ONE_GRAM_INCREMENTAL_COST
                     } else {
-                        -(word_to_index[prefix2_1gram_word] as i64 + ONE_GRAM_INCREMENTAL_COST)
+                        word_to_index[prefix2_1gram_word] as i64 + ONE_GRAM_INCREMENTAL_COST
                     };
                     g.add_edge(word1_index, word2_index, weight);
+                    is_edge_added.insert((word1_index, word2_index));
                 }
             }
             // ----------------------------------------------------------------
@@ -308,7 +311,7 @@ fn get_random_passphrase_graph(
         .map(|p| *prefix_level_bimap.get_by_left(&p).unwrap())
         .collect();
     let (shortest_path, cost) =
-        shortest_path_multiple(&g, first_prefix_words, last_prefix_words, rng).unwrap();
+        shortest_path_multiple(&mut g, first_prefix_words, last_prefix_words, rng).unwrap();
     let shortest_path = shortest_path
         .iter()
         .map(|graph_index| {

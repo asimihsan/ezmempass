@@ -64,6 +64,8 @@ def flutterInputFileTree = fileTree("flutter_app") {
     exclude("*.iml")
     exclude(".packages")
     exclude(".flutter-plugins")
+    exclude(".flutter-plugins-dependencies")
+    exclude("pubspec.lock")
     exclude("ios/.symlinks")
 }
 
@@ -298,5 +300,5 @@ task ensureIosSimulatorRunning(type: Exec) {
 task iosIntegrationTest(type: Exec) {
     dependsOn(ensureIosSimulatorRunning, flutterBuildIos)
     workingDir 'flutter_app'
-    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/main.dart'
+    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/main.dart', '-d', 'iph'
 }

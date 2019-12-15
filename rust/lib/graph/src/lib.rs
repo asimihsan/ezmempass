@@ -3,9 +3,8 @@ TODO create a Graph impl backed by the wordlist data file, without needing to cr
 edges
 */
 
+use permutation_iterator::RandomPairPermutor;
 use priority_queue::PriorityQueue;
-use rand::Rng;
-use std::cmp::min;
 use std::collections::{hash_set, HashMap, HashSet};
 
 /// Graph trait that allows algorithms to be applied.
@@ -61,33 +60,11 @@ impl SimpleInMemoryGraph {
     }
 }
 
-/// Given a vector with [0..max-1] elements inside it you want a random index that is weighted to
-/// prefer elements at the front of the list. This is because our word lists are weighted most
-/// common to least common.
-fn get_weighted_random_index(max: usize, rng: &mut impl Rng) -> usize {
-    let mut lo: i32 = 0;
-    let mut hi: i32 = (max - 1) as i32;
-    while lo <= hi {
-        let mid: i32 = lo + (hi - lo) / 2;
-        let random_value: f64 = rng.gen();
-        if random_value < 0.8 {
-            hi = mid - 1;
-        } else {
-            lo = mid + 1;
-        }
-    }
-    if hi < 1 {
-        hi = 1;
-    }
-    rng.gen_range(0, hi) as usize
-}
-
 /// Returns shortest path from multiple start nodes to multiple goal nodes and the associated cost.
 pub fn shortest_path_multiple(
     graph: &impl Graph,
     starts: Vec<u32>,
     goals: Vec<u32>,
-    rng: &mut impl Rng,
 ) -> Option<(Vec<u32>, i64)> {
     let mut current_shortest_path_cost: i64 = i64::min_value();
     let mut current_shortest_path: Vec<u32> = Vec::new();
@@ -113,25 +90,23 @@ pub fn shortest_path_multiple(
         }
     }
     */
-    let mut i = 0;
-    const MAX_ITERS: i32 = 100;
+    const MAX_ITERS: usize = 100;
     let starts_len = starts.len();
     let goals_len = goals.len();
     if starts_len == 0 || goals_len == 0 {
         return None;
     }
-    let mut seen_starts_goals: HashSet<(u32, u32)> =
-        HashSet::with_capacity(min(starts_len * goals_len, 100));
-    while i <= MAX_ITERS {
-        i += 1;
-        let start = starts[get_weighted_random_index(starts_len, rng)];
-        let goal = goals[get_weighted_random_index(goals_len, rng)];
-        let key = (start, goal);
-        if seen_starts_goals.contains(&key) {
-            continue;
-        }
-        seen_starts_goals.insert(key);
-
+    let random_pairs_permutation: Vec<(u32, u32)> =
+        RandomPairPermutor::new(starts_len as u32, goals_len as u32)
+            .take(MAX_ITERS)
+            .collect();
+    let mut pairs: Vec<(u32, u32)> = Vec::with_capacity(4);
+    for (i, j) in (0..starts_len).take(2).zip(0..goals_len).take(2) {
+        pairs.push((i as u32, j as u32));
+    }
+    for (start_index, goal_index) in pairs.into_iter().chain(random_pairs_permutation) {
+        let start = starts[start_index as usize];
+        let goal = goals[goal_index as usize];
         match shortest_path(graph, start, goal) {
             None => continue,
             Some((path, cost)) => {
@@ -142,12 +117,6 @@ pub fn shortest_path_multiple(
                 }
             }
         }
-        //        if i % 100 == 0 {
-        //            println!(
-        //                "current best path {:?} cost {}",
-        //                current_shortest_path, current_shortest_path_cost
-        //            );
-        //        }
     }
     if !found_any_path {
         None
@@ -207,7 +176,6 @@ pub fn shortest_path(graph: &impl Graph, start: u32, goal: u32) -> Option<(Vec<u
 #[cfg(test)]
 mod shortest_path_simple_in_memory_graph_tests {
     use super::*;
-    use rand::rngs::mock;
 
     /// A -> B -> C -> D -> E, all edges weight of 1.
     /// A, E shortest path should return A, B, C, D, E
@@ -274,7 +242,6 @@ mod shortest_path_simple_in_memory_graph_tests {
     #[ignore]
     fn test_shortest_path_multiple_basic() {
         // == given ==
-        let mut rng = mock::StepRng::new(0, 1);
         let mut g: SimpleInMemoryGraph = SimpleInMemoryGraph::new();
         g.add_edge(1, 2, -1);
         g.add_edge(2, 3, -5);
@@ -282,7 +249,7 @@ mod shortest_path_simple_in_memory_graph_tests {
         g.add_edge(5, 6, -1);
 
         // == when ==
-        let shortest_path = shortest_path_multiple(&g, vec![1, 4], vec![3, 6], &mut rng);
+        let shortest_path = shortest_path_multiple(&g, vec![1, 4], vec![3, 6]);
 
         // == then ==
         assert_eq!(shortest_path.is_some(), true);

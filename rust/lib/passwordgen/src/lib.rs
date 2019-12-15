@@ -74,7 +74,6 @@ pub fn generate_passphrase_internal(
         &words,
         &word_to_index,
         &word_to_edges_encoded,
-        rng,
     );
     let (password, passphrase) = convert_prefixes_to_password_and_passphrase(
         &random_prefixes,
@@ -195,7 +194,6 @@ fn get_random_passphrase_graph(
     words: &[String],
     word_to_index: &HashMap<String, u32>,
     word_to_edges_encoded: &Vec<Vec<u8>>,
-    rng: &mut impl Rng,
 ) -> (Vec<String>, i64) {
     let mut g = SimpleInMemoryGraph::new();
     let mut start = true;
@@ -308,7 +306,7 @@ fn get_random_passphrase_graph(
         .map(|p| *prefix_level_bimap.get_by_left(&p).unwrap())
         .collect();
     let (shortest_path, cost) =
-        shortest_path_multiple(&g, first_prefix_words, last_prefix_words, rng).unwrap();
+        shortest_path_multiple(&g, first_prefix_words, last_prefix_words).unwrap();
     let shortest_path = shortest_path
         .iter()
         .map(|graph_index| {

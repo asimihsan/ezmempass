@@ -17,4 +17,5 @@ rand = "0.7.2"
 bimap = "0.4.0"
 graph = { path = "../graph" }
 integer_coding = { path = "../integer_coding" }
-permutation_iterator = "0.1.1"
+
+permutation_iterator = "0.1.2"

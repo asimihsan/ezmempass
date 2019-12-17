@@ -247,7 +247,7 @@ task flutterBuildIos(type: Exec) {
         '--no-pub'
 }
 
-task flutterBuildAndroidFatApk(type: Exec) {
+task flutterBuildAndroidApks(type: Exec) {
     dependsOn(
         flutterPubGet,
         flutterProtobufPreferences,
@@ -262,13 +262,14 @@ task flutterBuildAndroidFatApk(type: Exec) {
     commandLine 'flutter', 'build', 'apk',
         '--debug',
         '--target-platform', 'android-arm64,android-arm,android-x86,android-x64',
-        '--no-pub'
+        '--no-pub',
+        '--split-per-abi'
 }
 
 task flutterBuild {
     dependsOn(
         flutterBuildIos,
-        flutterBuildAndroidFatApk
+        flutterBuildAndroidApks
     )
 }
 
@@ -300,5 +301,11 @@ task ensureIosSimulatorRunning(type: Exec) {
 task iosIntegrationTest(type: Exec) {
     dependsOn(ensureIosSimulatorRunning, flutterBuildIos)
     workingDir 'flutter_app'
-    commandLine 'flutter', 'drive', '--no-build', '--target', 'test_driver/main.dart', '-d', 'iph'
+    commandLine 'flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', 'iph'
+}
+
+task androidIntegrationTest(type: Exec) {
+    dependsOn(ensureIosSimulatorRunning, flutterBuildAndroidApks)
+    workingDir 'flutter_app'
+    commandLine 'flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', 'android'
 }

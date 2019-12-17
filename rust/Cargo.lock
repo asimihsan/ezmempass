@@ -104,7 +104,7 @@ dependencies = [
 name = "graph"
 version = "0.1.0"
 dependencies = [
- "permutation_iterator 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "permutation_iterator 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "priority-queue 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -194,7 +194,7 @@ dependencies = [
  "bimap 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "graph 0.1.0",
  "integer_coding 0.1.0",
- "permutation_iterator 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "permutation_iterator 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -209,7 +209,7 @@ dependencies = [
 
 [[package]]
 name = "permutation_iterator"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "blake2-rfc 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -394,7 +394,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum mini-internal 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "bc6a4477c72f7884d4505975c95fd161a9bdf48f9d0dded587a1b496f15b87fa"
 "checksum miniserde 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "4d7c5d2b9208197826e5050eca282e400df4b776044eb8c3603eb36e2389c59b"
 "checksum nodrop 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)" = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
-"checksum permutation_iterator 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8cd7fac77bf94fb35b846e05919dd6ab486173d6ed40c50f8a7a8af5ae2e41b1"
+"checksum permutation_iterator 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b55405179fe06e4e3820ddaf9f9b51cdff9e7496af9554acdb2b1921a86ca9cb"
 "checksum ppv-lite86 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "74490b50b9fbe561ac330df47c08f3f33073d2d00c150f719147d7c54522fa1b"
 "checksum priority-queue 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "602c2e38842965277b124586dbc4691d83f37af5b4ecd7c9e46908e1bd7d5b35"
 "checksum proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "9c9e470a8dc4aeae2dee2f335e8f533e2d4b347e1434e5671afc49b054592f27"

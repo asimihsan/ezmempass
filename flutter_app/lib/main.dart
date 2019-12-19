@@ -278,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     //  Add capital letter switch
     // ------------------------------------------------------------------------
-    final Widget capitalLetterSwitch = MultiPlatformSwitchListTile(
+    final Widget capitalLetterSwitch = SwitchListTile(
         title: Text('Capital letters',
             style:
                 Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
@@ -298,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //  Add digit switch
     // ------------------------------------------------------------------------
 
-    final Widget digitSwitch = MultiPlatformSwitchListTile(
+    final Widget digitSwitch = SwitchListTile(
         title: Text('Digit',
             style:
                 Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
@@ -317,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // ------------------------------------------------------------------------
     //  Add symbol
     // ------------------------------------------------------------------------
-    final Widget symbolSwitch = MultiPlatformSwitchListTile(
+    final Widget symbolSwitch = SwitchListTile(
         title: Text('Symbol',
             style:
                 Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
@@ -331,6 +331,19 @@ class _MyHomePageState extends State<MyHomePage> {
         });
     final Widget symbolContainer =
         Container(padding: const EdgeInsets.fromLTRB(0, 0, 0, 0), child: symbolSwitch);
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    //  Add button
+    // ------------------------------------------------------------------------
+    final Widget button = new RaisedButton(
+      padding: const EdgeInsets.all(16.0),
+      onPressed: _generatePassphrase,
+      child: new Text("Generate password",
+          style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+      key: Key('generate'),
+    );
+    final Widget buttonContainer = Container(padding: const EdgeInsets.all(16), child: button);
     // ------------------------------------------------------------------------
 
     return Scaffold(
@@ -355,13 +368,8 @@ class _MyHomePageState extends State<MyHomePage> {
           capitalLetterContainer,
           digitContainer,
           symbolContainer,
+          buttonContainer,
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _generatePassphrase,
-        tooltip: 'Generate',
-        child: Icon(Icons.autorenew),
-        key: Key('generate'),
       ),
     );
   }

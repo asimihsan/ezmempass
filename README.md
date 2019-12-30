@@ -2,6 +2,12 @@
 
 Strong, easy to memorize passwords.
 
+## Introduction
+
+This document describes the project at a high level and how to get started developing with the Rust shared library and the Flutter mobile app.
+
+-   To read more about how to generate the language model, see LANGUAGE_MODEL.md.
+
 ## What problem does this project solve?
 
 Passwords are important and, for better or worse, aren't going anywhere. The best way of dealing with passwords is to use a password manager like 1Password to store random, unique passwords for each website, and then a single very strong password for the password manager. However there are two issues with this.

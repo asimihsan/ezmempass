@@ -5,13 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/help_screen.dart';
+import 'package:flutter_app/initial_intro.dart';
 import 'package:flutter_app/multiplatform_switch_list_tile.dart';
 import 'package:flutter_app/gen/protos/preferences.pb.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(InitialIntro());
+  //runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

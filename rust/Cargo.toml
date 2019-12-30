@@ -5,7 +5,8 @@ members = [
     "lib/integer_coding",
     "lib/passwordgen",
     "lib/passwordgenffi",
-    "bin/ezmempass"
+    "bin/ezmempass",
+    "bin/language_model",
 ]
 
 [profile.release]

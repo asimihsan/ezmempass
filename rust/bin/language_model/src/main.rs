@@ -4,7 +4,7 @@ use clap::{App, Arg, SubCommand};
 use std::error::Error;
 use std::path::Path;
 
-pub mod create_arpa_model;
+pub mod create_wordlist;
 pub mod split;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -43,8 +43,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .value_name("POSITIVE INTEGER"),
             ))
         .subcommand(
-        SubCommand::with_name("create-arpa-model")
-            .about("Create an ARPA language model from line-delimited files of articles")
+        SubCommand::with_name("create-wordlist")
+            .about("Create a language model from line-delimited files of articles")
             .arg(
                 Arg::with_name("input_dir")
                     .long("input-dir")
@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .required(true)
                     .takes_value(true)
                     .validator(validate_input_dir)
-                    .help("Directory full of line-delimited GZ files. Will put output ARPA model file here.")
+                    .help("Directory full of line-delimited GZ files. Will put output wordlist file here.")
                     .value_name("DIR"),
             )
         );
@@ -69,9 +69,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap();
             split::handle_split(input_path, output_dir, pieces)
         }
-        ("create-arpa-model", Some(create_arpa_model_matches)) => {
+        ("create-wordlist", Some(create_arpa_model_matches)) => {
             let input_dir = Path::new(create_arpa_model_matches.value_of("input_dir").unwrap());
-            create_arpa_model::handle_create_arpa_model(input_dir)
+            create_wordlist::handle_create_arpa_model(input_dir)
         }
         ("", None) => {
             let err: Box<dyn Error> = String::from("Need to specify a sub-command.").into();

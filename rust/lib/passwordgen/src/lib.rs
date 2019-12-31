@@ -7,7 +7,7 @@ use std::str::FromStr;
 use rand::Rng;
 
 use graph::{shortest_path_multiple, Graph, SimpleInMemoryGraph};
-use integer_coding::DeltaDecoder;
+use integer_coding::delta::DeltaDecoder;
 
 const ONE_GRAM_INCREMENTAL_COST: i64 = 1_000_000;
 

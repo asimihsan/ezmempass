@@ -16,6 +16,10 @@ use unicode_normalization::UnicodeNormalization;
 
 /// TODO
 ///
+/// -   Use the twogram iterator and calculate onegram and twogram counts at the same time, return
+///     both.
+/// -   Use sqlite to store the counts instead of in-memory.
+///
 /// References
 /// -   https://rust-lang-nursery.github.io/rust-cookbook/concurrency/threads.html
 pub fn handle_create_arpa_model(input_dir: &Path) -> Result<(), Box<dyn Error>> {
@@ -27,75 +31,8 @@ pub fn handle_create_arpa_model(input_dir: &Path) -> Result<(), Box<dyn Error>> 
     const PREFIX_SIZE: usize = 3;
 
     let en_dict = load_dict(en_dict)?;
-    let onegrams = calculate_onegrams_threaded(input_dir, &en_dict);
-
-    // ------------------------------------------------------------------------
-    //  Take top-most onegrams that match word pattern.
-    // ------------------------------------------------------------------------
-    let mut top_onegrams: Vec<(&String, &u64)> = onegrams
-        .counts
-        .iter()
-        .filter(|(onegram, count)| onegram.len() >= PREFIX_SIZE)
-        .collect();
-    top_onegrams.sort_by_key(|(_onegram, count)| Reverse(*count));
-    let top_onegrams: Vec<&String> = top_onegrams
-        .into_iter()
-        .map(|(onegram, _count)| onegram)
-        .take(top_onegram_count)
-        .collect();
-    // ------------------------------------------------------------------------
-
-    // ------------------------------------------------------------------------
-    // Find the top "number_of_prefixes" prefixes of all top onegrams.
-    // ------------------------------------------------------------------------
-    let mut prefixes_count: HashMap<String, u32> = HashMap::new();
-    top_onegrams
-        .iter()
-        .map(|word| word.chars().take(PREFIX_SIZE).collect())
-        .for_each(|prefix| {
-            *prefixes_count.entry(prefix).or_insert(0) += 1;
-        });
-    let mut prefixes_sorted_count: Vec<(String, u32)> = prefixes_count.into_iter().collect();
-    prefixes_sorted_count.sort_by_key(|(_word, count)| Reverse(*count));
-    let prefixes_sorted_count: Vec<String> = prefixes_sorted_count
-        .into_iter()
-        .take(number_of_prefixes)
-        .map(|(prefix, _count)| prefix)
-        .collect();
-    let mut prefix_lookup: HashSet<String> = HashSet::with_capacity(prefixes_sorted_count.len());
-    prefixes_sorted_count.into_iter().for_each(|prefix| {
-        prefix_lookup.insert(prefix);
-    });
-    if prefix_lookup.len() != number_of_prefixes {
-        panic!(
-            "not enough prefixes found, only {} need {}",
-            prefix_lookup.len(),
-            number_of_prefixes
-        );
-    }
-    // ------------------------------------------------------------------------
-
-    // ------------------------------------------------------------------------
-    // Re-filter top onegrams to only include those that start with a wanted prefix.
-    // ------------------------------------------------------------------------
-    let top_onegrams: Vec<&String> = top_onegrams
-        .into_iter()
-        .filter(|onegram| {
-            let actual_prefix: String = onegram.chars().take(PREFIX_SIZE).collect::<String>();
-            prefix_lookup.contains(&actual_prefix)
-        })
-        .collect();
-    println!(
-        "top_onegrams.len() that match prefixes: {}",
-        top_onegrams.len()
-    );
-    // ------------------------------------------------------------------------
-
-    // ------------------------------------------------------------------------
-    //  Finally now that we have the final onegrams sorted by frequency we can do a second pass on
-    //  the wiki dump and look for twograms instead that both are in this top onegram list.
-    // ------------------------------------------------------------------------
-
+    let onegrams = calculate_onegrams_threaded(input_dir);
+    let twograms = calculate_twograms_threaded(input_dir);
     Ok(())
 }
 
@@ -110,7 +47,7 @@ fn load_dict(dict_bytes: &[u8]) -> Result<HashSet<String>, Box<dyn Error>> {
     Ok(dict)
 }
 
-fn calculate_onegrams_threaded(input_dir: &Path, dict: &HashSet<String>) -> OnegramsResult {
+fn calculate_onegrams_threaded(input_dir: &Path) -> OnegramsResult {
     let pool = ThreadPool::new(max(num_cpus::get() - 1, 1));
     let (tx, rx) = mpsc::channel();
     input_dir
@@ -128,9 +65,8 @@ fn calculate_onegrams_threaded(input_dir: &Path, dict: &HashSet<String>) -> Oneg
         })
         .for_each(|input_file| {
             let tx = tx.clone();
-            let dict = dict.clone();
             pool.execute(move || {
-                let result = calculate_onegrams(input_file.as_ref(), &dict);
+                let result = calculate_onegrams(input_file.as_ref());
                 if result.is_ok() {
                     tx.send(result.unwrap()).unwrap();
                 } else {
@@ -164,10 +100,7 @@ struct OnegramsResult {
     counts: HashMap<String, u64>,
 }
 
-fn calculate_onegrams(
-    input_file: &Path,
-    dict: &HashSet<String>,
-) -> Result<OnegramsResult, Box<dyn Error>> {
+fn calculate_onegrams(input_file: &Path) -> Result<OnegramsResult, Box<dyn Error>> {
     let mut total = 0;
     let mut counts = HashMap::new();
     for line in LineIterator::new(input_file).unwrap() {
@@ -179,15 +112,103 @@ fn calculate_onegrams(
                 token.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace())
             })
             .filter(|token| !token.is_empty())
-            .filter(|token| dict.contains(*token))
+        //            .filter(|token| dict.contains(*token))
         {
+            total += 1;
             let counter = counts.entry(token.to_string()).or_insert(0);
             *counter += 1;
-            total += 1;
         }
     }
 
     Ok(OnegramsResult { total, counts })
+}
+
+fn merge_twograms_results(iter: impl Iterator<Item = TwogramsResult>) -> TwogramsResult {
+    let mut total = 0;
+    let mut counts = HashMap::new();
+    for result in iter {
+        total += result.total;
+        for (word1, word2_counts) in result.counts.into_iter() {
+            let existing_count_word1 = counts.entry(word1).or_insert_with(HashMap::new);
+            for (word2, count) in word2_counts.into_iter() {
+                let existing_count_word2 = existing_count_word1.entry(word2).or_insert(0);
+                *existing_count_word2 += count;
+            }
+        }
+    }
+    TwogramsResult { total, counts }
+}
+
+fn calculate_twograms_threaded(input_dir: &Path) -> TwogramsResult {
+    let pool = ThreadPool::new(max(num_cpus::get() - 1, 1));
+    let (tx, rx) = mpsc::channel();
+    input_dir
+        .read_dir()
+        .unwrap()
+        .map(|entry| entry.unwrap())
+        .map(|entry| entry.path())
+        .filter(|path| path.is_file())
+        .filter(|path| {
+            path.file_stem()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .contains("split")
+        })
+        .for_each(|input_file| {
+            let tx = tx.clone();
+            pool.execute(move || {
+                let result = calculate_twograms(input_file.as_ref());
+                if result.is_ok() {
+                    tx.send(result.unwrap()).unwrap();
+                } else {
+                    panic!(
+                        "failed to determine twogram counts for file {:?}: {:?}",
+                        input_file, result
+                    );
+                }
+            });
+        });
+    drop(tx);
+    merge_twograms_results(rx.iter())
+}
+
+#[derive(Debug)]
+struct TwogramsResult {
+    total: u64,
+    counts: HashMap<String, HashMap<String, u32>>,
+}
+
+fn calculate_twograms(input_file: &Path) -> Result<TwogramsResult, std::io::Error> {
+    let mut total = 0;
+    let mut counts = HashMap::new();
+    for line in LineIterator::new(input_file).unwrap() {
+        let line_borrowed = line.borrow();
+        let token1_iter = line_borrowed.split_whitespace().map(|token| token.trim());
+        let token2_iter = line_borrowed.split_whitespace().map(|token| token.trim());
+        token1_iter
+            .zip(token2_iter.skip(1))
+            .map(|(token1, token2)| {
+                (
+                    token1.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()),
+                    token2.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()),
+                )
+            })
+            .filter(|(token1, token2)| !token1.is_empty() && !token2.is_empty())
+            //            .filter(|(token1, token2)| {
+            //                top_onegrams_lookup.contains(*token1) && top_onegrams_lookup.contains(*token2)
+            //            })
+            .for_each(|(token1, token2)| {
+                total += 1;
+                let entry = counts
+                    .entry(token1.to_owned())
+                    .or_insert_with(HashMap::new)
+                    .entry(token2.to_owned())
+                    .or_insert(0);
+                *entry += 1;
+            });
+    }
+    Ok(TwogramsResult { total, counts })
 }
 
 struct LineIterator {

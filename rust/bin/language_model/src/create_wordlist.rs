@@ -8,11 +8,15 @@ use std::path::Path;
 use std::rc::Rc;
 
 use flate2::read::GzDecoder;
-use std::cmp::{max, Reverse};
+use scoped_threadpool::Pool;
+use std::cmp::max;
 use std::io;
 use std::sync::mpsc;
-use threadpool::ThreadPool;
 use unicode_normalization::UnicodeNormalization;
+
+/// If a word is not in the dictionry change it to this. This will never appear in the corpus
+/// because we trim puncutation from the beginning and ends of words.
+const OUT_OF_VOCABULARY_WORD: &str = "<unk>";
 
 /// TODO
 ///
@@ -26,189 +30,162 @@ pub fn handle_create_arpa_model(input_dir: &Path) -> Result<(), Box<dyn Error>> 
     println!("create_arpa_model entry");
 
     let en_dict: &[u8] = include_bytes!("3of6game.txt");
-    let top_onegram_count = 100_000;
-    let number_of_prefixes = 1024;
-    const PREFIX_SIZE: usize = 3;
-
     let en_dict = load_dict(en_dict)?;
-    let onegrams = calculate_onegrams_threaded(input_dir);
-    let twograms = calculate_twograms_threaded(input_dir);
+
+    println!("calculating ngrams...");
+    let ngrams = calculate_ngrams_threaded(input_dir, &en_dict);
+    for (token, count) in ngrams.unigram_counts.iter().take(100) {
+        println!("onegram token {} count {}", token, count);
+    }
+    for (token, count) in ngrams.bigram_counts.iter().take(100) {
+        let counts: Vec<(&String, &u64)> = count.iter().take(10).collect();
+        println!("twogram token {} count {:?}", token, counts);
+    }
+
     Ok(())
 }
 
 fn load_dict(dict_bytes: &[u8]) -> Result<HashSet<String>, Box<dyn Error>> {
     let dict = io::Cursor::new(dict_bytes);
     let dict = BufReader::new(dict);
-    let dict: HashSet<String> = dict
+    let dict = dict
         .lines()
         .map(|result| result.unwrap())
         .map(|line| line.nfc().collect::<String>())
+        .map(|line| {
+            String::from(line.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()))
+        })
         .collect();
     Ok(dict)
 }
 
-fn calculate_onegrams_threaded(input_dir: &Path) -> OnegramsResult {
-    let pool = ThreadPool::new(max(num_cpus::get() - 1, 1));
-    let (tx, rx) = mpsc::channel();
-    input_dir
-        .read_dir()
-        .unwrap()
-        .map(|entry| entry.unwrap())
-        .map(|entry| entry.path())
-        .filter(|path| path.is_file())
-        .filter(|path| {
-            path.file_stem()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .contains("split")
-        })
-        .for_each(|input_file| {
-            let tx = tx.clone();
-            pool.execute(move || {
-                let result = calculate_onegrams(input_file.as_ref());
-                if result.is_ok() {
-                    tx.send(result.unwrap()).unwrap();
-                } else {
-                    panic!(
-                        "failed to determine counts for file {:?}: {:?}",
-                        input_file, result
-                    );
-                }
-            });
-        });
-    drop(tx);
-    merge_onegrams_results(rx.iter())
-}
-
-fn merge_onegrams_results(iter: impl Iterator<Item = OnegramsResult>) -> OnegramsResult {
-    let mut total = 0;
-    let mut counts = HashMap::new();
+fn merge_ngrams_results(iter: impl Iterator<Item = NgramsResult>) -> NgramsResult {
+    let mut total_unigrams = 0;
+    let mut unigram_counts = HashMap::new();
+    let mut bigram_counts = HashMap::new();
     for result in iter {
-        total += result.total;
-        for (word, count) in result.counts.into_iter() {
-            let existing_count = counts.entry(word).or_insert(0);
+        total_unigrams += result.total_unigrams;
+
+        for (word, count) in result.unigram_counts.into_iter() {
+            let existing_count = unigram_counts.entry(word).or_insert(0);
             *existing_count += count;
         }
-    }
-    OnegramsResult { total, counts }
-}
 
-#[derive(Debug)]
-struct OnegramsResult {
-    total: u64,
-    counts: HashMap<String, u64>,
-}
-
-fn calculate_onegrams(input_file: &Path) -> Result<OnegramsResult, Box<dyn Error>> {
-    let mut total = 0;
-    let mut counts = HashMap::new();
-    for line in LineIterator::new(input_file).unwrap() {
-        let line_borrowed = line.borrow();
-        let line_trimmed = line_borrowed.trim_end();
-        for token in line_trimmed
-            .split_whitespace()
-            .map(|token| {
-                token.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace())
-            })
-            .filter(|token| !token.is_empty())
-        //            .filter(|token| dict.contains(*token))
-        {
-            total += 1;
-            let counter = counts.entry(token.to_string()).or_insert(0);
-            *counter += 1;
-        }
-    }
-
-    Ok(OnegramsResult { total, counts })
-}
-
-fn merge_twograms_results(iter: impl Iterator<Item = TwogramsResult>) -> TwogramsResult {
-    let mut total = 0;
-    let mut counts = HashMap::new();
-    for result in iter {
-        total += result.total;
-        for (word1, word2_counts) in result.counts.into_iter() {
-            let existing_count_word1 = counts.entry(word1).or_insert_with(HashMap::new);
+        for (word1, word2_counts) in result.bigram_counts.into_iter() {
+            let existing_count_word1 = bigram_counts.entry(word1).or_insert_with(HashMap::new);
             for (word2, count) in word2_counts.into_iter() {
                 let existing_count_word2 = existing_count_word1.entry(word2).or_insert(0);
                 *existing_count_word2 += count;
             }
         }
     }
-    TwogramsResult { total, counts }
+    NgramsResult {
+        total_unigrams,
+        unigram_counts,
+        bigram_counts,
+    }
 }
 
-fn calculate_twograms_threaded(input_dir: &Path) -> TwogramsResult {
-    let pool = ThreadPool::new(max(num_cpus::get() - 1, 1));
+fn calculate_ngrams_threaded(input_dir: &Path, dict: &HashSet<String>) -> NgramsResult {
+    let mut pool = Pool::new(max(num_cpus::get() as u32 - 1, 1));
     let (tx, rx) = mpsc::channel();
-    input_dir
-        .read_dir()
-        .unwrap()
-        .map(|entry| entry.unwrap())
-        .map(|entry| entry.path())
-        .filter(|path| path.is_file())
-        .filter(|path| {
-            path.file_stem()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .contains("split")
-        })
-        .for_each(|input_file| {
-            let tx = tx.clone();
-            pool.execute(move || {
-                let result = calculate_twograms(input_file.as_ref());
-                if result.is_ok() {
-                    tx.send(result.unwrap()).unwrap();
-                } else {
-                    panic!(
-                        "failed to determine twogram counts for file {:?}: {:?}",
-                        input_file, result
-                    );
-                }
+    pool.scoped(|scope| {
+        input_dir
+            .read_dir()
+            .unwrap()
+            .map(|entry| entry.unwrap())
+            .map(|entry| entry.path())
+            .filter(|path| path.is_file())
+            .filter(|path| {
+                path.file_stem()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .contains("split")
+            })
+            .for_each(|input_file| {
+                let tx = tx.clone();
+                scope.execute(move || {
+                    let result = calculate_ngrams(input_file.as_ref(), dict);
+                    if result.is_ok() {
+                        tx.send(result.unwrap()).unwrap();
+                    } else {
+                        panic!(
+                            "failed to determine twogram counts for file {:?}: {:?}",
+                            input_file, result
+                        );
+                    }
+                });
             });
-        });
+    });
     drop(tx);
-    merge_twograms_results(rx.iter())
+    merge_ngrams_results(rx.iter())
 }
 
 #[derive(Debug)]
-struct TwogramsResult {
-    total: u64,
-    counts: HashMap<String, HashMap<String, u32>>,
+struct NgramsResult {
+    /// Total number of unigrams in the corpus. The probability of a given unigram is the frequency
+    /// of the unigram divided by this.
+    total_unigrams: u64,
+
+    /// Counts of specific unigrams. When you divide this by unigram_context_count you get the
+    /// unigram probability.
+    unigram_counts: HashMap<String, u64>,
+
+    /// Counts of specific bigrams. The probability of a bigram (w_1, w_2) is the count of
+    /// (w_1, w_2) divided by the count of w_1, which you can get from unigram_counts.
+    bigram_counts: HashMap<String, HashMap<String, u64>>,
 }
 
-fn calculate_twograms(input_file: &Path) -> Result<TwogramsResult, std::io::Error> {
-    let mut total = 0;
-    let mut counts = HashMap::new();
+fn calculate_ngrams(
+    input_file: &Path,
+    dict: &HashSet<String>,
+) -> Result<NgramsResult, std::io::Error> {
+    let mut total_unigrams = 0;
+    let mut unigram_counts = HashMap::new();
+    let mut bigram_counts = HashMap::new();
     for line in LineIterator::new(input_file).unwrap() {
         let line_borrowed = line.borrow();
-        let token1_iter = line_borrowed.split_whitespace().map(|token| token.trim());
-        let token2_iter = line_borrowed.split_whitespace().map(|token| token.trim());
-        token1_iter
-            .zip(token2_iter.skip(1))
-            .map(|(token1, token2)| {
-                (
-                    token1.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()),
-                    token2.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace()),
-                )
+        let tokens: Vec<&str> = line_borrowed
+            .split_whitespace()
+            .map(|token| {
+                token.trim_matches(|c: char| c.is_ascii_punctuation() || c.is_whitespace())
             })
-            .filter(|(token1, token2)| !token1.is_empty() && !token2.is_empty())
-            //            .filter(|(token1, token2)| {
-            //                top_onegrams_lookup.contains(*token1) && top_onegrams_lookup.contains(*token2)
-            //            })
-            .for_each(|(token1, token2)| {
-                total += 1;
-                let entry = counts
-                    .entry(token1.to_owned())
-                    .or_insert_with(HashMap::new)
-                    .entry(token2.to_owned())
-                    .or_insert(0);
-                *entry += 1;
-            });
+            .map(|token| {
+                if dict.contains(token) {
+                    token
+                } else {
+                    OUT_OF_VOCABULARY_WORD
+                }
+            })
+            .collect();
+        for (token1, token2) in tokens.iter().zip(tokens.iter().skip(1)) {
+            total_unigrams += 1;
+
+            let unigram_entry = unigram_counts.entry((*token1).to_string()).or_insert(0);
+            *unigram_entry += 1;
+
+            let bigram_entry = bigram_counts
+                .entry((*token1).to_string())
+                .or_insert_with(HashMap::new)
+                .entry((*token2).to_string())
+                .or_insert(0);
+            *bigram_entry += 1;
+        }
+
+        // The iteration above missed the last token as a unigram so we tack it on here.
+        if tokens.len() >= 2 {
+            let last_token = tokens[tokens.len() - 1];
+            total_unigrams += 1;
+            let unigram_entry = unigram_counts.entry(last_token.to_string()).or_insert(0);
+            *unigram_entry += 1;
+        }
     }
-    Ok(TwogramsResult { total, counts })
+    Ok(NgramsResult {
+        total_unigrams,
+        unigram_counts,
+        bigram_counts,
+    })
 }
 
 struct LineIterator {

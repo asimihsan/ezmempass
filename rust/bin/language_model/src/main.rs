@@ -4,7 +4,7 @@ use clap::{App, Arg, SubCommand};
 use std::error::Error;
 use std::path::Path;
 
-pub mod create_wordlist;
+pub mod create_arpa_model;
 pub mod split;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -43,8 +43,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .value_name("POSITIVE INTEGER"),
             ))
         .subcommand(
-        SubCommand::with_name("create-wordlist")
-            .about("Create a language model from line-delimited files of articles")
+        SubCommand::with_name("create-arpa-model")
+            .about("Create a ARPA language model from line-delimited files of articles")
             .arg(
                 Arg::with_name("input_dir")
                     .long("input-dir")
@@ -52,8 +52,17 @@ fn main() -> Result<(), Box<dyn Error>> {
                     .required(true)
                     .takes_value(true)
                     .validator(validate_input_dir)
-                    .help("Directory full of line-delimited GZ files. Will put output wordlist file here.")
+                    .help("Directory full of line-delimited GZ files. Will put output ARPA language model file here.")
                     .value_name("DIR"),
+            )
+            .arg(
+                Arg::with_name("output_file")
+                    .long("output-file")
+                    .short("o")
+                    .required(true)
+                    .takes_value(true)
+                    .help("Name of output ARPA language model file. Will be GZIP compressed and have .gz appended.")
+                    .value_name("FILE"),
             )
         );
     let matches = app.get_matches();
@@ -69,9 +78,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap();
             split::handle_split(input_path, output_dir, pieces)
         }
-        ("create-wordlist", Some(create_arpa_model_matches)) => {
+        ("create-arpa-model", Some(create_arpa_model_matches)) => {
             let input_dir = Path::new(create_arpa_model_matches.value_of("input_dir").unwrap());
-            create_wordlist::handle_create_arpa_model(input_dir)
+            let output_file = create_arpa_model_matches
+                .value_of("output_file")
+                .unwrap()
+                .to_string();
+            create_arpa_model::handle_create_arpa_model(input_dir, &output_file)
         }
         ("", None) => {
             let err: Box<dyn Error> = String::from("Need to specify a sub-command.").into();

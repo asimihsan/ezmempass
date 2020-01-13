@@ -168,7 +168,7 @@ target/release/ezmempass 8
 -   If you just want to do the Android build because e.g. you're on a Windows machine you can instead run:
 
 ```
-./gradlew flutterBuildAndroidFatApk
+./gradlew flutterBuildAndroidApks
 ```
 
 -   Then you want to use either Android Studio, open the Flutter project, and run on the Android Virtual Device (AVD), or do so from the command line. First launch the AVD simulator via Android Studio, Tools -> AVD Manager. Then:

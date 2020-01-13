@@ -66,6 +66,7 @@ If you're on Mac you can build the Rust + Android + iOS parts of this project.
 -   Launch Android Studio, and install the Android SDK.
     -   This should also create an Android Virtual Device (AVD) for you, if not create one that supports SDK 23 and higher.
 -   Install Flutter to the `$HOME/flutter` directory (your home directory): https://flutter.dev/docs/get-started/install
+    -   I'd recommend following the "Test drive" step and running the app on both an Android emulator and an iOS simulator.
 -   Ensure `flutter doctor` eventually runs without warnings or errors, follow its instructions.
 -   Set up the Android NDK
     -   Download the ZIP file from https://developer.android.com/ndk/downloads/
@@ -125,11 +126,17 @@ export PATH="${PATH}":"${HOME}"/flutter/bin/cache/dart-sdk/bin/
 
 ### Setup for both iOS and Android
 
+#### Java setup
+
 We use Gradle as a build tool. Gradle runs a sequence of commands that builds the underlying Rust library, Flutter code, iOS and Android applications. In order to start using Gradle you need to install Java on your system:
 
--   Amazon Corretto is a fork of the OpenJDK version of Java, download and install version 11 of it: https://aws.amazon.com/corretto/. There are two important installation steps:
+-   Amazon Corretto is a fork of the OpenJDK version of Java, download and install version 8 of it: https://aws.amazon.com/corretto/. There are two important installation steps:
     1.  Download the correct installer format for your operating system and install it.
     2.  Go back to the root page https://aws.amazon.com/corretto/, follow the OS-specific "Installation Guide for Corretto 11" link at the bottom, and complete setting up your environment variables.
+
+The Android command-line tools only support Java 8. You can have both 8 and 11 installed at the same time, just ensure the `JAVA_HOME` variable points at 8. On Mac you can run `/usr/libexec/java_home --verbose` to get the `JAVA_HOME` paths.
+
+#### Building everything on Mac
 
 This is the most typical interaction point on Mac systems using Gradle:
 
@@ -137,9 +144,9 @@ This is the most typical interaction point on Mac systems using Gradle:
 ./gradlew clean all
 ```
 
--   If this command fails some part of the setup doesn't work. We can iterate on the setup to improve it.
--   Subsequent builds you just need to do `all`.
+For Windows you need to only run and build Android, see below.
 
+Once built you can run on either iOS or Android by opening the `flutter_app` sub-folder in Android Studio then running the app.
 
 ### Setup just for Rust
 
@@ -165,18 +172,42 @@ target/release/ezmempass 8
 
 ### Setup for just Android
 
--   If you just want to do the Android build because e.g. you're on a Windows machine you can instead run:
+Note that Android command-line tools only work on Java 8, not Java 11!
+
+If you're running on Windows then you can only develop Android apps, not iOS apps. First ensure that you have an Android Virtual Device (AVD) created for the Android target SDK version you want to test (for us it's 28). You can launch Android Studio, go to Tools -> AVD Manager, and create one.
+
+To use Android command-line tools check your Android SDK path in `flutter doctor -v` and assuming the path is e.g. `/Users/asimi/Library/Android/sdk` ensure `/Users/asimi/Library/Android/sdk/tools/bin` is in your system path variable.
+
+Then from the command line run `avdmanager list avd` to see a list of virtual devices and pick one that you want to use. In my case I want to use `Nexus_5X_API_27_x86`.
+
+First run the emulator:
 
 ```
-./gradlew flutterBuildAndroidApks
+flutter emulators --launch Nexus_5X_API_27_x86
 ```
 
--   Then you want to use either Android Studio, open the Flutter project, and run on the Android Virtual Device (AVD), or do so from the command line. First launch the AVD simulator via Android Studio, Tools -> AVD Manager. Then:
+Then get the ID of the running emulator:
 
 ```
-cd flutter_app
-flutter run -d android
+$ flutter devices
+1 connected device:
+
+Android SDK built for x86 • emulator-5554 • android-x86 • Android 8.1.0 (API 27) (emulator)
 ```
+
+Here `emulator-5554` is the device ID. Finally run the app on the emulator, for Windows:
+
+```
+gradlew.bat runAndroid -PemulatorId=emulator-5554
+```
+
+For Mac:
+
+```
+./gradlew runAndroid -PemulatorId=emulator-5554
+```
+
+You can do the equivalent from the Android Studio, just open `flutter_app` in Android Studio, use the AVD manager to start a new emulator, then run the app on it.
 
 ### Troubleshooting
 

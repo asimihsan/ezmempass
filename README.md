@@ -125,7 +125,13 @@ export PATH="${PATH}":"${HOME}"/flutter/bin/cache/dart-sdk/bin/
 
 ### Setup for both iOS and Android
 
-We use Gradle as a build tool. Gradle runs a sequence of commands that builds the underlying Rust library, Flutter code, iOS and Android applications. This is the most typical interaction point on Mac systems.
+We use Gradle as a build tool. Gradle runs a sequence of commands that builds the underlying Rust library, Flutter code, iOS and Android applications. In order to start using Gradle you need to install Java on your system:
+
+-   Amazon Corretto is a fork of the OpenJDK version of Java, download and install version 11 of it: https://aws.amazon.com/corretto/. There are two important installation steps:
+    1.  Download the correct installer format for your operating system and install it.
+    2.  Go back to the root page https://aws.amazon.com/corretto/, follow the OS-specific "Installation Guide for Corretto 11" link at the bottom, and complete setting up your environment variables.
+
+This is the most typical interaction point on Mac systems using Gradle:
 
 ```
 ./gradlew clean all

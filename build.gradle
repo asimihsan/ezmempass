@@ -22,7 +22,20 @@ export PATH="$PATH":"$HOME/flutter/bin/cache/dart-sdk/bin"
 
 */
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'base'
+
+private static Iterable<String> osAdaptiveCommand(String... commands) {
+    // Reference: https://stackoverflow.com/questions/27406054/how-do-you-support-a-gradle-exec-task-for-both-mac-and-pc
+    def newCommands = []
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        newCommands = ['cmd', '/c']
+    }
+
+    newCommands.addAll(commands)
+    return newCommands
+}
 
 clean {
     delete file("rust/target")
@@ -73,7 +86,7 @@ task rustBuild(type: Exec) {
     inputs.files(rustInputFileTree.getFiles())
     outputs.dir file("rust/target/debug")
     workingDir 'rust'
-    commandLine 'cargo', 'test'
+    commandLine osAdaptiveCommand('cargo', 'test')
 }
 
 task rustGenerateHeader(type: Exec) {
@@ -83,7 +96,7 @@ task rustGenerateHeader(type: Exec) {
         file("build/passwordgenffi.h")
     )
     workingDir 'rust/lib/passwordgenffi'
-    commandLine 'bash', '-c', 'cbindgen --lang c > ../../../build/passwordgenffi.h'
+    commandLine osAdaptiveCommand('bash', '-c', 'cbindgen --lang c > ../../../build/passwordgenffi.h')
 }
 
 task rustGenerateIosLibrary(type: Exec) {
@@ -93,7 +106,7 @@ task rustGenerateIosLibrary(type: Exec) {
         file("rust/target/universal/release/libpasswordgenffi.a")
     )
     workingDir 'rust'
-    commandLine 'cargo', 'lipo', '--release'
+    commandLine osAdaptiveCommand('cargo', 'lipo', '--release')
 }
 
 task rustGenerateAndroidAarch64(type: Exec) {
@@ -103,11 +116,11 @@ task rustGenerateAndroidAarch64(type: Exec) {
         file("rust/target/aarch64-linux-android/release/libpasswordgenffi.so")
     )
     workingDir 'rust'
-    commandLine 'cargo', 'ndk',
+    commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'aarch64-linux-android',
         '--android-platform', "23", 
         '--',
-        'build', '--release'
+        'build', '--release')
 }
 
 task rustGenerateAndroidArm(type: Exec) {
@@ -117,11 +130,11 @@ task rustGenerateAndroidArm(type: Exec) {
         file("rust/target/armv7-linux-androideabi/release/libpasswordgenffi.so")
     )
     workingDir 'rust'
-    commandLine 'cargo', 'ndk',
+    commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'armv7-linux-androideabi',
         '--android-platform', "23", 
         '--',
-        'build', '--release'
+        'build', '--release')
 }
 
 task rustGenerateAndroidi686(type: Exec) {
@@ -131,11 +144,11 @@ task rustGenerateAndroidi686(type: Exec) {
         file("rust/target/i686-linux-android/release/libpasswordgenffi.so")
     )
     workingDir 'rust'
-    commandLine 'cargo', 'ndk',
+    commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'i686-linux-android',
         '--android-platform', "23", 
         '--',
-        'build', '--release'
+        'build', '--release')
 }
 
 task rustGenerateAndroidx8664(type: Exec) {
@@ -145,11 +158,11 @@ task rustGenerateAndroidx8664(type: Exec) {
         file("rust/target/x86_64-linux-android/release/libpasswordgenffi.so")
     )
     workingDir 'rust'
-    commandLine 'cargo', 'ndk',
+    commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'x86_64-linux-android',
         '--android-platform', "23", 
         '--',
-        'build', '--release'
+        'build', '--release')
 }
 
 task androidCopyAarch64(type: Copy) {
@@ -221,7 +234,7 @@ task flutterProtobufPreferences(type: Exec) {
         file("flutter_app/lib/gen/")
     )
     workingDir 'flutter_app'
-    commandLine 'protoc', '--dart_out', './lib/gen', './protos/preferences.proto'
+    commandLine osAdaptiveCommand('protoc', '--dart_out', './lib/gen', './protos/preferences.proto')
 }
 
 task flutterPubGet(type: Exec) {
@@ -231,7 +244,7 @@ task flutterPubGet(type: Exec) {
         file("flutter_app/.flutter-plugins")
     )
     workingDir 'flutter_app'
-    commandLine 'flutter', 'pub', 'get'
+    commandLine osAdaptiveCommand('flutter', 'pub', 'get')
 }
 
 task flutterBuildIos(type: Exec) {
@@ -243,8 +256,7 @@ task flutterBuildIos(type: Exec) {
     inputs.files(flutterInputFileTree.getFiles())
     outputs.dir file("flutter_app/build/ios/iphoneos")
     workingDir 'flutter_app'
-    commandLine 'flutter', 'build', 'ios',
-        '--no-pub'
+    commandLine osAdaptiveCommand('flutter', 'build', 'ios', '--no-pub')
 }
 
 task flutterBuildAndroidApks(type: Exec) {
@@ -259,11 +271,11 @@ task flutterBuildAndroidApks(type: Exec) {
     inputs.files(flutterInputFileTree.getFiles())
     outputs.dir file("flutter_app/build/app/outputs/apk")
     workingDir 'flutter_app'
-    commandLine 'flutter', 'build', 'apk',
+    commandLine osAdaptiveCommand('flutter', 'build', 'apk',
         '--debug',
         '--target-platform', 'android-arm64,android-arm,android-x86,android-x64',
         '--no-pub',
-        '--split-per-abi'
+        '--split-per-abi')
 }
 
 task flutterBuild {
@@ -271,6 +283,14 @@ task flutterBuild {
         flutterBuildIos,
         flutterBuildAndroidApks
     )
+}
+
+task runAndroid(type: Exec) {
+    dependsOn(flutterBuildAndroidApks)
+    workingDir 'flutter_app'
+    if (project.hasProperty('emulatorId')) {
+        commandLine osAdaptiveCommand('flutter', 'run', '-d', emulatorId, '--no-hot')
+    }
 }
 
 task all {
@@ -295,17 +315,19 @@ task backup(type: Zip) {
 
 task ensureIosSimulatorRunning(type: Exec) {
     workingDir 'flutter_app'
-    commandLine 'open', '-a', 'Simulator', '-g'
+    commandLine osAdaptiveCommand('open', '-a', 'Simulator', '-g')
 }
 
 task iosIntegrationTest(type: Exec) {
     dependsOn(ensureIosSimulatorRunning, flutterBuildIos)
     workingDir 'flutter_app'
-    commandLine 'flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', 'iph'
+    commandLine osAdaptiveCommand('flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', 'iph')
 }
 
 task androidIntegrationTest(type: Exec) {
-    dependsOn(ensureIosSimulatorRunning, flutterBuildAndroidApks)
+    dependsOn(flutterBuildAndroidApks)
     workingDir 'flutter_app'
-    commandLine 'flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', 'android'
+    if (project.hasProperty('emulatorId')) {
+        commandLine osAdaptiveCommand('flutter', 'drive', '--no-pub', '--target', 'test_driver/main.dart', '-d', emulatorId)
+    }
 }

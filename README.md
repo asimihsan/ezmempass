@@ -145,10 +145,10 @@ In this step we just use `cargo` directly. `cargo` is how you build Rust applica
 cd rust
 
 # This is how you build.
-cargo build --workspace --all-targets --release
+cargo build
 
 # This is how to run the unit tests
-cargo test --workspace --all-targets --release
+cargo test
 
 # Here is how to run the CLI tool via cargo, an 8-word passphrase.
 cargo run --bin ezmempass --release -- 8

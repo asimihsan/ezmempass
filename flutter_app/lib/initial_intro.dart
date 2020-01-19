@@ -3,6 +3,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/widgets/initial_intro_card.dart';
 
 class InitialIntro extends StatefulWidget {
   @override
@@ -16,10 +17,9 @@ class _InitialIntroState extends State<InitialIntro> {
   Widget build(BuildContext context) {
     final Widget slider = Builder(builder: (BuildContext context) {
       return CarouselSlider(
-        height: MediaQuery.of(context).size.height * 0.9,
-        viewportFraction: 1.0,
         initialPage: 0,
-        autoPlay: false,
+        height: 2000,
+        viewportFraction: 1.0,
         scrollDirection: Axis.horizontal,
         enableInfiniteScroll: false,
         onPageChanged: (index) {
@@ -28,50 +28,40 @@ class _InitialIntroState extends State<InitialIntro> {
           });
         },
         items: <Widget>[
-          Container(
-              padding: const EdgeInsets.all(64),
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.all(40.0),
-              decoration: BoxDecoration(color: Theme.of(context).canvasColor),
-              child: Text(
-                'EzMemPass helps you make strong, easy to remember passwords! Page 1',
-                style: Theme.of(context)
-                    .textTheme
-                    .headline
-                    .copyWith(fontFamily: 'RecursiveSansLinear'),
-              )),
-          Container(
-              padding: const EdgeInsets.all(64),
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.all(40.0),
-              decoration: BoxDecoration(color: Theme.of(context).canvasColor),
-              child: Text(
-                'EzMemPass helps you make strong, easy to remember passwords! Page 2',
-                style: Theme.of(context)
-                    .textTheme
-                    .headline
-                    .copyWith(fontFamily: 'RecursiveSansLinear'),
-              )),
-          Container(
-              padding: const EdgeInsets.all(64),
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.all(40.0),
-              decoration: BoxDecoration(color: Theme.of(context).canvasColor),
-              child: Text(
-                'EzMemPass helps you make strong, easy to remember passwords! Page 3',
-                style: Theme.of(context)
-                    .textTheme
-                    .headline
-                    .copyWith(fontFamily: 'RecursiveSansLinear'),
-              )),
+          InitialIntroCard(
+              cardText: 'ezMemPass helps you make strong, easy to remember passwords! Card 1'
+          ),
+          InitialIntroCard(
+              cardText: 'Card 2'
+          ),
+          InitialIntroCard(
+              cardText: 'Card 3'
+          ),
         ],
       );
     });
-    final Widget dots_indicator = new DotsIndicator(dotsCount: 3, position: _current.toDouble());
+
+    final Widget dotsIndicator = new DotsIndicator(
+        dotsCount: 3,
+        position: _current.toDouble(),
+    );
+
     final Widget sliderContainer = Builder(builder: (BuildContext context) {
-      return Column(children: <Widget>[
-        slider,
-        dots_indicator,
+      return Column(
+          children: <Widget>[
+        Expanded(
+          child: Row(children: <Widget> [
+              Expanded(
+                child: slider,
+              )
+            ]
+          ),
+        ),
+//        slider,
+        Container(
+          padding: const EdgeInsets.all(10),
+          child: dotsIndicator,
+        ),
         RaisedButton(
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
@@ -88,6 +78,9 @@ class _InitialIntroState extends State<InitialIntro> {
           brightness: Brightness.dark,
           primarySwatch: Colors.blue,
         ),
-        home: sliderContainer);
+        home: SafeArea(
+          child: sliderContainer,
+        ),
+    );
   }
 }

@@ -66,7 +66,9 @@ If you're on Mac you can build the Rust + Android + iOS parts of this project.
 -   Launch Android Studio, and install the Android SDK.
     -   This should also create an Android Virtual Device (AVD) for you, if not create one that supports SDK 23 and higher.
 -   Install Flutter to the `$HOME/flutter` directory (your home directory): https://flutter.dev/docs/get-started/install
-    -   I'd recommend following the "Test drive" step and running the app on both an Android emulator and an iOS simulator.
+-   Follow the "Test drive" step of the "Get started" instructions of the Flutter tutorial: https://flutter.dev/docs/get-started/test-drive
+    -   This will ensure that at least an Android Virtual Device (AVD) is set up.
+    -   If you're on Mac, also try to run the initial test app on an iOS Simulator.
 -   Ensure `flutter doctor` eventually runs without warnings or errors, follow its instructions.
 -   Set up the Android NDK
     -   Download the ZIP file from https://developer.android.com/ndk/downloads/

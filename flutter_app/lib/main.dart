@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(InitialIntro());
-  //runApp(MyApp());
+//  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -361,18 +361,20 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ),
       ),
-      body: ListView(
-        physics: ClampingScrollPhysics(),
-        children: <Widget>[
-          passwordContainer,
-          passphraseContainer,
-          numberOfWordsContainer,
-          capitalLetterContainer,
-          digitContainer,
-          symbolContainer,
-          buttonContainer,
-        ],
-      ),
+      body: SafeArea(
+        child: ListView(
+          physics: ClampingScrollPhysics(),
+          children: <Widget>[
+            passwordContainer,
+            passphraseContainer,
+            numberOfWordsContainer,
+            capitalLetterContainer,
+            digitContainer,
+            symbolContainer,
+            buttonContainer,
+          ],
+        ),
+      )
     );
   }
 }

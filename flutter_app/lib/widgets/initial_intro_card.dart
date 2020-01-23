@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 class InitialIntroCard extends StatelessWidget {
   final String cardText;
 
-  @override
-
   InitialIntroCard({
     @required this.cardText,
   });

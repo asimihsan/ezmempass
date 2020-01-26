@@ -37,8 +37,18 @@ class HelpScreen extends StatelessWidget {
           child: FutureBuilder(
             future: loadHelpText(context),
             builder: (context, snapshot) {
+              final Brightness brightnessValue = MediaQuery.of(context).platformBrightness;
+              bool isDark = brightnessValue == Brightness.dark;
               return MarkdownBody(
-                  data: snapshot.data ?? '');
+                data: snapshot.data ?? '',
+                styleSheet: MarkdownStyleSheet.fromTheme(
+                    Theme.of(context)).copyWith(
+                        blockquoteDecoration: BoxDecoration(
+                          color: isDark ? Colors.blue.withOpacity(0.4) : Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(2.0),
+                      ),
+                    )
+                  );
             },
           ),
         ),

@@ -17,45 +17,39 @@ class _InitialIntroState extends State<InitialIntro> {
   Widget build(BuildContext context) {
     final Widget slider = Builder(builder: (BuildContext context) {
       return CarouselSlider(
-        initialPage: 0,
-        height: 2000,
-        viewportFraction: 1.0,
-        scrollDirection: Axis.horizontal,
-        enableInfiniteScroll: false,
-        onPageChanged: (index) {
-          setState(() {
-            _current = index;
-          });
-        },
+        options: CarouselOptions(
+            initialPage: 0,
+            height: 2000,
+            viewportFraction: 1.0,
+            scrollDirection: Axis.horizontal,
+            enableInfiniteScroll: false,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _current = index;
+              });
+            }),
         items: <Widget>[
           InitialIntroCard(
-              cardText: 'ezMemPass helps you make strong, easy to remember passwords! Card 1'
-          ),
-          InitialIntroCard(
-              cardText: 'Card 2'
-          ),
-          InitialIntroCard(
-              cardText: 'Card 3'
-          ),
+              cardText: 'ezMemPass helps you make strong, easy to remember passwords! Card 1'),
+          InitialIntroCard(cardText: 'Card 2'),
+          InitialIntroCard(cardText: 'Card 3'),
         ],
       );
     });
 
     final Widget dotsIndicator = new DotsIndicator(
-        dotsCount: 3,
-        position: _current.toDouble(),
+      dotsCount: 3,
+      position: _current.toDouble(),
     );
 
     final Widget sliderContainer = Builder(builder: (BuildContext context) {
-      return Column(
-          children: <Widget>[
+      return Column(children: <Widget>[
         Expanded(
-          child: Row(children: <Widget> [
-              Expanded(
-                child: slider,
-              )
-            ]
-          ),
+          child: Row(children: <Widget>[
+            Expanded(
+              child: slider,
+            )
+          ]),
         ),
 //        slider,
         Container(
@@ -70,17 +64,17 @@ class _InitialIntroState extends State<InitialIntro> {
       ]);
     });
     return MaterialApp(
-        theme: ThemeData(
-          brightness: Brightness.light,
-          primarySwatch: Colors.blue,
-        ),
-        darkTheme: ThemeData(
-          brightness: Brightness.dark,
-          primarySwatch: Colors.blue,
-        ),
-        home: SafeArea(
-          child: sliderContainer,
-        ),
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.blue,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+      ),
+      home: SafeArea(
+        child: sliderContainer,
+      ),
     );
   }
 }

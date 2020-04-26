@@ -21,11 +21,9 @@ class InitialIntroCard extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             cardText,
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .headline
-                .copyWith(fontFamily: 'RecursiveSansLinear'),
+            textAlign: TextAlign.left,
+            style:
+                Theme.of(context).textTheme.headline6.copyWith(fontFamily: 'RecursiveSansLinear'),
           )),
     );
   }

@@ -18,7 +18,7 @@ The password on its own is difficult to remember. However with a memory aid the 
 
 Use 7 or more words for regular use, 10 or more words for very important passwords such as for your **password manager** or **email account**.
 
-For a password with 7 words, EzMemPass chooses 7 three-letter prefixes out of 1024 possible prefixes. Hence a 7-word password is actually built up of `1024 ^ 7 = 1.18 * 10^21 = 2^70` possible combinations prefixes. Colloquially, `2^70` means "there is 70 bits of randomness in the password". Someone attempting to guess a 7 word password must guess `2^70` times. As of 2020, passwords should contain at least 70 bits of randomness.
+For a password with 7 words, EzMemPass chooses 7 three-letter prefixes out of 1024 possible prefixes. Hence a 7-word password is chosen from `1024 ^ 7 = 1.18 * 10^21 = 2^70` possible combinations of prefixes. Someone attempting to guess a 7 word password must guess `2^70` times.
 
 Adding capital letters, digits, or symbols is there just to satisfy the password rules of some services and websites.
 

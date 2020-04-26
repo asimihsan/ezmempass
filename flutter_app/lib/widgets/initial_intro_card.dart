@@ -19,11 +19,14 @@ class InitialIntroCard extends StatelessWidget {
       decoration: BoxDecoration(color: Theme.of(context).canvasColor),
       child: Align(
           alignment: Alignment.center,
-          child: Text(
-            cardText,
-            textAlign: TextAlign.left,
-            style:
-                Theme.of(context).textTheme.headline6.copyWith(fontFamily: 'RecursiveSansLinear'),
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            child: Text(
+              cardText,
+              textAlign: TextAlign.left,
+              style:
+                  Theme.of(context).textTheme.headline6.copyWith(fontFamily: 'RecursiveSansLinear'),
+            ),
           )),
     );
   }

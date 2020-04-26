@@ -5,4 +5,5 @@ message Preferences {
     bool addCapitalLetter = 2;
     bool addDigit = 3;
     bool addSymbol = 4;
+    bool isFirstLaunch = 5;
 }

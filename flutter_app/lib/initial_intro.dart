@@ -3,7 +3,10 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/models/preferences_model.dart';
 import 'package:flutter_app/widgets/initial_intro_card.dart';
+import 'package:flutter_app/widgets/password_generator_app.dart';
+import 'package:provider/provider.dart';
 
 class InitialIntro extends StatefulWidget {
   @override
@@ -65,14 +68,20 @@ Remember the memory aid words and the first three letters of each word is your p
             )
           ]),
         ),
-//        slider,
         Container(
           padding: const EdgeInsets.all(10),
           child: dotsIndicator,
         ),
         RaisedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
+              final PreferencesModel preferencesModel =
+                  Provider.of<PreferencesModel>(context, listen: false);
+              preferencesModel.setIsFirstLaunch(false);
+              final Widget child = ListenableProvider(
+                create: (_) => preferencesModel,
+                child: PasswordGeneratorApp(),
+              );
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => child));
             },
             child: Text('Continue to the app'))
       ]);

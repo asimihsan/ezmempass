@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/initial_intro.dart';
+import 'package:flutter_app/widgets/initial_intro.dart';
 import 'package:flutter_app/models/preferences_model.dart';
 import 'package:flutter_app/widgets/password_generator_app.dart';
 import 'package:provider/provider.dart';

@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/help_screen.dart';
+import 'package:flutter_app/widgets/help_screen.dart';
 import 'package:flutter_app/models/preferences_model.dart';
+import 'package:flutter_app/widgets/settings_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
@@ -267,6 +268,18 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
                 );
               },
             ),
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.settings),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ListenableProvider.value(
+                              value: preferencesModel, child: SettingsWidget())),
+                    );
+                  }),
+            ],
           ),
           body: SafeArea(
             child: ListView(

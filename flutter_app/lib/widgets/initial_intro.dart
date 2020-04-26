@@ -77,8 +77,8 @@ Remember the memory aid words and the first three letters of each word is your p
               final PreferencesModel preferencesModel =
                   Provider.of<PreferencesModel>(context, listen: false);
               preferencesModel.setIsFirstLaunch(false);
-              final Widget child = ListenableProvider(
-                create: (_) => preferencesModel,
+              final Widget child = ListenableProvider.value(
+                value: preferencesModel,
                 child: PasswordGeneratorApp(),
               );
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => child));

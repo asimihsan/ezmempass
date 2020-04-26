@@ -11,6 +11,21 @@ class InitialIntro extends StatefulWidget {
 }
 
 class _InitialIntroState extends State<InitialIntro> {
+  static final EN_CARD_1 = """EzMemPass creates strong, easy to remember passwords!""";
+  static final EN_CARD_2 = """Passwords will look like:
+
+foobanmadava
+
+There is a corresponding "memory aid" that is easier to memorize, like:
+
+food bank made available
+
+Remember the memory aid words and the first three letters of each word is your password!""";
+
+  static final EN_CARD_3 = """Use passwords with 8 or more words to create strong passwords.""";
+
+  static final NUMBER_OF_CARDS = 3;
+
   int _current = 0;
 
   @override
@@ -29,16 +44,15 @@ class _InitialIntroState extends State<InitialIntro> {
               });
             }),
         items: <Widget>[
-          InitialIntroCard(
-              cardText: 'ezMemPass helps you make strong, easy to remember passwords! Card 1'),
-          InitialIntroCard(cardText: 'Card 2'),
-          InitialIntroCard(cardText: 'Card 3'),
+          InitialIntroCard(cardText: EN_CARD_1),
+          InitialIntroCard(cardText: EN_CARD_2),
+          InitialIntroCard(cardText: EN_CARD_3),
         ],
       );
     });
 
     final Widget dotsIndicator = new DotsIndicator(
-      dotsCount: 3,
+      dotsCount: NUMBER_OF_CARDS,
       position: _current.toDouble(),
     );
 

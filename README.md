@@ -228,3 +228,34 @@ TODO this is easy and doesn't require a special certificate.
 ### Running the iOS build on AWS Device Farm
 
 TODO this is trickier and does require you to have the Apple release profile, or pay $99 for one.
+
+## How to create privacy policy HTML file
+
+-   Download `pandoc-goodies`: https://github.com/tajmone/pandoc-goodies/
+-   Install `GitHub.html5` template to `~/.pandoc/templates`:
+
+```
+mkdir -p ~/.pandoc/templates
+cp ~/Downloads/pandoc-goodies-master/templates/html5/github/GitHub.html5 ~/.pandoc/templates
+```
+
+-   Change to root directory of `ezmempass` then run:
+
+```
+pandoc --toc --output docs/privacy_policy/index.html --variable "pagetitle:EzMemPass Privacy Policy" --template=GitHub.html5 flutter_app/assets/privacy_policy.md
+```
+
+## How to deploy privacy policy HTML file
+
+```
+cd cdk
+npm run build
+
+# TODO add tests
+# npm run test
+
+# if this is the first time you've deployed to this AWS account
+cdk bootstrap
+
+npm run build && cdk deploy prod-EzMemPassPrivacyPolicyStack --strict
+```

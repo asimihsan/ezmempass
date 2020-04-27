@@ -2,7 +2,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/main.dart';
 import 'package:flutter_app/models/preferences_model.dart';
 import 'package:flutter_app/widgets/initial_intro_card.dart';
 import 'package:flutter_app/widgets/password_generator_app.dart';
@@ -14,8 +13,8 @@ class InitialIntro extends StatefulWidget {
 }
 
 class _InitialIntroState extends State<InitialIntro> {
-  static final EN_CARD_1 = """EzMemPass creates strong, easy to remember passwords!""";
-  static final EN_CARD_2 = """Passwords will look like:
+  static final enCard1 = """EzMemPass creates strong, easy to remember passwords!""";
+  static final enCard2 = """Passwords will look like:
 
 foobanmadava
 
@@ -25,9 +24,9 @@ food bank made available
 
 Remember the memory aid words and the first three letters of each word is your password!""";
 
-  static final EN_CARD_3 = """Use passwords with 8 or more words to create strong passwords.""";
+  static final enCard3 = """Use passwords with 8 or more words to create strong passwords.""";
 
-  static final NUMBER_OF_CARDS = 3;
+  static final numberOfCards = 3;
 
   int _current = 0;
 
@@ -47,15 +46,15 @@ Remember the memory aid words and the first three letters of each word is your p
               });
             }),
         items: <Widget>[
-          InitialIntroCard(cardText: EN_CARD_1),
-          InitialIntroCard(cardText: EN_CARD_2),
-          InitialIntroCard(cardText: EN_CARD_3),
+          InitialIntroCard(cardText: enCard1),
+          InitialIntroCard(cardText: enCard2),
+          InitialIntroCard(cardText: enCard3),
         ],
       );
     });
 
     final Widget dotsIndicator = new DotsIndicator(
-      dotsCount: NUMBER_OF_CARDS,
+      dotsCount: numberOfCards,
       position: _current.toDouble(),
     );
 

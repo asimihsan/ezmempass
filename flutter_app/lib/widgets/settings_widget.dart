@@ -33,7 +33,7 @@ class SettingsWidget extends StatelessWidget {
 
 const ABOUT_TEXT = """## About EzMemPass
 
-**Version**: 1.0.0 build 5
+**Version**: 1.0.0 build 6
 **Authors**: Asim Ihsan and Jack Vaught
 
 Please send comments, questions, and feedback to:

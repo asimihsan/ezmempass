@@ -259,3 +259,20 @@ cdk bootstrap
 
 npm run build && cdk deploy prod-EzMemPassPrivacyPolicyStack --strict
 ```
+
+## How to create support site HTML file
+
+Same prereqs as privacy policy, then
+
+```
+pandoc --toc --output docs/support_site/index.html --variable "pagetitle:EzMemPass" --template=GitHub.html5 docs/support_site.md
+```
+
+
+## How to deploy support site
+
+```
+cd cdk
+
+npm run build && cdk deploy prod-EzMemPassSupportSiteStack --strict
+```

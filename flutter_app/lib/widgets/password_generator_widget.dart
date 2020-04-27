@@ -77,12 +77,12 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget passwordLabel = Text(
         "Password",
-        style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
+        style: Theme.of(context).textTheme.headline5.copyWith(fontFamily: 'RecursiveSansLinear'),
       );
       final Widget passwordValue = Expanded(
           child: Text(
         _password,
-        style: Theme.of(context).textTheme.title.copyWith(fontFamily: 'RecursiveMonoLinear'),
+        style: Theme.of(context).textTheme.headline6.copyWith(fontFamily: 'RecursiveMonoLinear'),
         key: Key('password'),
       ));
       final Widget passwordValueCopyButton = IconButton(
@@ -114,12 +114,12 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget passphraseLabel = Text(
         "Memory aid",
-        style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
+        style: Theme.of(context).textTheme.headline5.copyWith(fontFamily: 'RecursiveSansLinear'),
       );
       final Widget passphraseValue = Expanded(
           child: Text(
         _passphrase,
-        style: Theme.of(context).textTheme.title.copyWith(fontFamily: 'RecursiveMonoLinear'),
+        style: Theme.of(context).textTheme.headline6.copyWith(fontFamily: 'RecursiveMonoLinear'),
       ));
       final Widget passphraseValueCopyButton = IconButton(
         icon: shareIcon,
@@ -150,14 +150,14 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget numberOfWordsLabel = Text(
         "Number of words",
-        style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
+        style: Theme.of(context).textTheme.headline5.copyWith(fontFamily: 'RecursiveSansLinear'),
       );
       final numberOfWordsSelector = DropdownButton<int>(
         value: preferencesModel.passphraseLength,
         icon: Icon(Icons.arrow_downward),
         iconSize: 24,
         elevation: 16,
-        style: Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear'),
+        style: Theme.of(context).textTheme.headline5.copyWith(fontFamily: 'RecursiveSansLinear'),
         underline: Container(
           height: 2,
           color: Colors.grey,
@@ -197,8 +197,10 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget capitalLetterSwitch = SwitchListTile(
           title: Text('Capital letters',
-              style:
-                  Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+              style: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .copyWith(fontFamily: 'RecursiveSansLinear')),
           value: preferencesModel.addCapitalLetter,
           onChanged: (bool value) {
             preferencesModel.setAddCapitalLetter(value);
@@ -213,8 +215,10 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget digitSwitch = SwitchListTile(
           title: Text('Digit',
-              style:
-                  Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+              style: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .copyWith(fontFamily: 'RecursiveSansLinear')),
           value: preferencesModel.addDigit,
           onChanged: (bool value) {
             preferencesModel.setAddDigit(value);
@@ -229,8 +233,10 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
       // ------------------------------------------------------------------------
       final Widget symbolSwitch = SwitchListTile(
           title: Text('Symbol',
-              style:
-                  Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+              style: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .copyWith(fontFamily: 'RecursiveSansLinear')),
           value: preferencesModel.addSymbol,
           onChanged: (bool value) {
             preferencesModel.setAddSymbol(value);
@@ -250,7 +256,7 @@ class _PasswordGeneratorWidgetState extends State<PasswordGeneratorWidget> {
         },
         child: new Text("Generate password",
             style:
-                Theme.of(context).textTheme.headline.copyWith(fontFamily: 'RecursiveSansLinear')),
+                Theme.of(context).textTheme.headline5.copyWith(fontFamily: 'RecursiveSansLinear')),
         key: Key('generate'),
       );
       final Widget buttonContainer = Container(padding: const EdgeInsets.all(16), child: button);

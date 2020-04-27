@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/models/preferences_model.dart';
+import 'package:flutter_app/widgets/privacy_policy_widget.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
@@ -52,16 +53,28 @@ class SettingsListView extends StatelessWidget {
       child: ListView(
         physics: ClampingScrollPhysics(),
         children: <Widget>[
-          Container(
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 32.0),
-            child: RaisedButton(
-              child: Text("Reset settings"),
-              onPressed: () async {
+          Card(
+            child: ListTile(
+              title: Text('Reset settings'),
+              trailing: Icon(Icons.keyboard_arrow_right),
+              onTap: () async {
                 final PreferencesModel preferencesModel =
                     Provider.of<PreferencesModel>(context, listen: false);
                 await preferencesModel.clear();
                 Scaffold.of(context)
                     .showSnackBar(SnackBar(content: Text("Successfully reset settings.")));
+              },
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: Text('Privacy policy'),
+              trailing: Icon(Icons.keyboard_arrow_right),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PrivacyPolicyWidget()),
+                );
               },
             ),
           ),

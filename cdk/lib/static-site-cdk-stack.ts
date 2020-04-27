@@ -7,8 +7,8 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deployment from '@aws-cdk/aws-s3-deployment';
 import * as targets from '@aws-cdk/aws-route53-targets';
 
-export class CdkStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, domainName: string, props?: cdk.StackProps) {
+export class StaticSiteCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, domainName: string, sourceFolder: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // ------------------------------------------------------------------------
@@ -73,7 +73,7 @@ export class CdkStack extends cdk.Stack {
     //  Actually deploy the site
     // ------------------------------------------------------------------------
     new s3deployment.BucketDeployment(this, 'DeployWithInvalidation', {
-      sources: [s3deployment.Source.asset('../docs/privacy_policy/')],
+      sources: [s3deployment.Source.asset(sourceFolder)],
       destinationBucket: siteBucket,
       distribution,
       distributionPaths: ['/*'],

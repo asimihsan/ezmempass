@@ -41,8 +41,8 @@ dev_dependencies:
   flutter_launcher_icons: ^0.7.5
 
 flutter_icons:
-  image_path: "assets/images/icon-1024x1024.png"
-  android: true # can specify file name here e.g. "ic_launcher"
+  image_path_ios: "assets/images/icon-1024x1024.png"
+  android: false # can specify file name here e.g. "ic_launcher"
   ios: true # can specify file name here e.g. "My-Launcher-Icon"
 
 # For information on the generic Dart part of this file, see the

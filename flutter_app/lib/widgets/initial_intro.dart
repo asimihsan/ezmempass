@@ -86,6 +86,7 @@ Remember the memory aid words and the first three letters of each word is your p
       ]);
     });
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.blue,

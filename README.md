@@ -97,13 +97,13 @@ cargo install cbindgen
 -   Install the Rust targets for iOS. This lets you cross-compile the Rust library so that it can run on iOS devices, even the Simulator.
 
 ```
-rustup target add aarch64-apple-ios armv7-apple-ios armv7s-apple-ios x86_64-apple-ios i386-apple-ios
+rustup target add aarch64-apple-ios x86_64-apple-ios
 ```
 
 -   Install the Rust targets for Android. This lets you cross-compile the Rust library so that it can run on Android devices, even the Android Virtual Device (AVD) emulator.
 
 ```
-rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+rustup target add aarch64-linux-android arm-linux-androideabi armv7-linux-androideabi i686-linux-android x86_64-linux-android
 ```
 
 -   Install protobuf generator. We use protobufs for persisting user preferences.

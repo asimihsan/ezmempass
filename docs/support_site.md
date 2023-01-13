@@ -1,5 +1,11 @@
 # EzMemPass
 
+## Download
+
+<a href="https://apps.apple.com/us/app/ezmempass/id1490538369"><img src="app-store-button.png" alt="Download on the App Store" width="200" height="60" /></a>
+<a href="https://play.google.com/store/apps/details?id=com.asimihsan.ezmempass&gl=US"><img src="google-play-badge.png" alt="Get it on Google Play" width="200" height="60" /></a>
+
+
 ## Introduction
 
 Using EzMemPass you can create strong, easy to remember passwords. Use these passwords for very important services like your email account, or your password manager.

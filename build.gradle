@@ -118,7 +118,7 @@ task rustGenerateAndroidAarch64(type: Exec) {
     workingDir 'rust'
     commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'aarch64-linux-android',
-        '--android-platform', "23", 
+        '--platform', "23", 
         '--',
         'build', '--release')
 }
@@ -132,7 +132,7 @@ task rustGenerateAndroidArm(type: Exec) {
     workingDir 'rust'
     commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'armv7-linux-androideabi',
-        '--android-platform', "23", 
+        '--platform', "23", 
         '--',
         'build', '--release')
 }
@@ -146,7 +146,7 @@ task rustGenerateAndroidi686(type: Exec) {
     workingDir 'rust'
     commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'i686-linux-android',
-        '--android-platform', "23", 
+        '--platform', "23", 
         '--',
         'build', '--release')
 }
@@ -160,7 +160,7 @@ task rustGenerateAndroidx8664(type: Exec) {
     workingDir 'rust'
     commandLine osAdaptiveCommand('cargo', 'ndk',
         '--target', 'x86_64-linux-android',
-        '--android-platform', "23", 
+        '--platform', "23", 
         '--',
         'build', '--release')
 }
@@ -238,6 +238,14 @@ task flutterProtobufPreferences(type: Exec) {
 }
 
 task flutterPubGet(type: Exec) {
+    mustRunAfter(
+        androidCopyArm,
+        androidCopyAarch64,
+        androidCopyi686,
+        androidCopyx8664,
+        rustIosCopy,
+        flutterProtobufPreferences
+    )
     inputs.files(flutterInputFileTree.getFiles())
     outputs.files(
         file("flutter_app/.packages"),
@@ -281,7 +289,7 @@ task flutterBuildAndroidApks(type: Exec) {
 task flutterBuild {
     dependsOn(
         flutterBuildIos,
-        flutterBuildAndroidApks
+        // flutterBuildAndroidApks
     )
 }
 

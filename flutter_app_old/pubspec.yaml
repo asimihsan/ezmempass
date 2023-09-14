@@ -14,23 +14,23 @@ description: Create strong and easy to memorize passwords
 version: 1.0.0+7
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^0.5.6
-  protobuf: ^1.0.1
-  share: ^0.6.3+5
-  flutter_markdown: ^0.3.2
-  carousel_slider: ^2.0.0
-  dots_indicator: ^1.0.0
+  shared_preferences: ^2.2.1
+  protobuf: ^3.1.0
+  share: ^2.0.4
+  flutter_markdown: ^0.6.17+3
+  carousel_slider: ^4.2.1
+  dots_indicator: ^3.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.3
+  cupertino_icons: ^1.0.6
 
-  provider: ^4.0.4
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
@@ -38,7 +38,7 @@ dev_dependencies:
   test: any
   flutter_driver:
     sdk: flutter
-  flutter_launcher_icons: ^0.7.5
+  flutter_launcher_icons: ^0.13.1
 
 flutter_icons:
   image_path_ios: "assets/images/icon-1024x1024.png"

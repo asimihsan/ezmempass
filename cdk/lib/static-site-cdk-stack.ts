@@ -45,16 +45,16 @@ export class StaticSiteCdkStack extends cdk.Stack {
         const distribution = new cloudfront.Distribution(this, 'SiteDistribution', {
             defaultBehavior: {
                 origin: new origins.S3Origin(siteBucket),
-                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+                viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                compress: true,
+                allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
             },
             certificate: certificate,
             domainNames: [domainName],
             priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
+            httpVersion: cloudfront.HttpVersion.HTTP2_AND_3,
+            minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2019,
         });
-
-        // Upgrade! https://docs.aws.amazon.com/cdk/api/v1/docs/aws-cloudfront-readme.html#migrating-from-the-original-cloudfrontwebdistribution-to-the-newer-distribution-construct
-        const cfnDistribution = distribution.node.defaultChild as cloudfront.CfnDistribution;
-        cfnDistribution.overrideLogicalId('SiteDistributionCFDistribution209CF7F5');
         // ------------------------------------------------------------------------
 
         // ------------------------------------------------------------------------

@@ -20,7 +20,7 @@ const supportSiteDomainName = 'ezmempass.ihsan.io'
 const supportSiteSourceFolder = '../docs/support_site/'
 new StaticSiteCdkStack(
     app,
-    'prod-EzMemPassSupportSiteStack2',
+    'prod-EzMemPassSupportSiteStack',
     supportSiteDomainName,
     supportSiteSourceFolder,
     {env: environment}

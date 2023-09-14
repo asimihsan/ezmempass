@@ -265,14 +265,12 @@ npm run build && cdk deploy prod-EzMemPassPrivacyPolicyStack --strict
 Same prereqs as privacy policy, then
 
 ```
-pandoc --toc --output docs/support_site/index.html --variable "pagetitle:EzMemPass" --template=GitHub.html5 docs/support_site.md
+(cd docs && pandoc --embed-resources --standalone --output support_site/index.html --variable "pagetitle:EzMemPass" --template=GitHub.html5 support_site.md)
 ```
 
 
 ## How to deploy support site
 
 ```
-cd cdk
-
-npm run build && cdk deploy prod-EzMemPassSupportSiteStack --strict
+(cd cdk && npm run build && aws-vault exec retail-admin --region us-west-2 -- cdk deploy prod-EzMemPassSupportSiteStack --strict)
 ```

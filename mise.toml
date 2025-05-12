@@ -1,0 +1,6 @@
+[tools]
+cargo-binstall = "latest"
+just = "latest"
+node = "latest"
+rust = "latest"
+taplo = "latest"

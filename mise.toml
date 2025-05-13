@@ -2,5 +2,5 @@
 cargo-binstall = "latest"
 just = "latest"
 node = "latest"
-rust = "latest"
+rust = { version = "stable", components = "clippy,rustfmt,llvm-tools-preview", targets = "wasm32-wasip1,wasm32-unknown-unknown" }
 taplo = "latest"

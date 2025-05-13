@@ -1,0 +1,3 @@
+# Force documentation of public items
+doc-valid-idents = ["TCP", "UDP", "IP"]
+too-many-arguments-threshold = 8

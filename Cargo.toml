@@ -1,0 +1,34 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/*",
+    "libs/*",
+    "tools/*",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+authors = ["Asim Ihsan"]
+repository = "https://github.com/asimihsan/ezmempass"
+
+[workspace.dependencies]
+# Core libraries
+anyhow = "1.0"
+thiserror = "2.0"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Testing
+rstest = "0.25"
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"

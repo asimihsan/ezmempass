@@ -1,0 +1,40 @@
+[package]
+name = "ezmempass-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Command-line interface for EzMemPass password generator"
+
+[dependencies]
+# Internal crates
+ezmempass-core = { path = "../../libs/ezmempass-core" }
+ezmempass-models = { path = "../../libs/ezmempass-models" }
+ezmempass-graph = { path = "../../libs/ezmempass-graph" }
+
+# Error handling
+anyhow.workspace = true
+thiserror.workspace = true
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+clap-verbosity-flag = "2.1"
+
+# Terminal UI
+crossterm = "0.27"
+ratatui = "0.26"
+
+# Async runtime
+tokio.workspace = true
+
+# Logging
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

@@ -1,5 +1,23 @@
 [build]
-# Uncomment the line below to switch Rust-analyzer to perform
-# type checking and linting in webassembly mode, for the web target.
-# You might have to restart Rust-analyzer for this change to take effect.
-# target = "wasm32-unknown-unknown"
+# Enables parallel compilation of crates in the workspace
+jobs = 4
+
+[target.aarch64-apple-darwin]
+rustflags = [
+  "--cfg",
+  "erase_components",
+]
+
+[target.wasm32-wasip1]
+rustflags = [
+  "--cfg=web_sys_unstable_apis",
+  "--cfg",
+  "erase_components",
+]
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+  "--cfg=web_sys_unstable_apis",
+  "--cfg",
+  "erase_components",
+]

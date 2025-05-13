@@ -1,0 +1,29 @@
+[package]
+name = "ezmempass-graph"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Graph search implementation for EzMemPass using petgraph"
+
+[dependencies]
+# Core library
+ezmempass-core = { path = "../ezmempass-core" }
+
+# Error handling
+anyhow.workspace = true
+thiserror.workspace = true
+
+# Graph library
+petgraph = "0.6.4"
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Logging
+tracing.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

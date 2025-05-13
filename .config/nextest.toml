@@ -1,0 +1,9 @@
+[profile.default]
+junit = { path = "junit.xml" }
+retries = 1
+status-level = "all"
+
+[profile.ci]
+failure-output = "immediate-final"
+retries = 2
+junit = { path = "junit.xml" }

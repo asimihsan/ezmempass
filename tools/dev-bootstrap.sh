@@ -15,7 +15,8 @@ cargo binstall -y \
     cargo-udeps \
     cargo-watch \
     trunk \
-    leptosfmt
+    leptosfmt \
+    cargo-generate
 
 pre-commit install --hook-type pre-commit
 

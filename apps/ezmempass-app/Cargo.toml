@@ -10,12 +10,14 @@ authors.workspace = true
 console_error_panic_hook = "0.1"
 console_log = "1"
 getrandom = { version = "0.3", features = ["wasm_js"] }
+gloo-worker = { version = "0.5", features = ["futures"] }
 leptos = { version = "0.8.2", features = ["csr"] }
 leptos_meta = { version = "0.8.2" }
 leptos_router = { version = "0.8.2" }
 log = "0.4"
 
 ezmempass-core = { path = "../../libs/ezmempass-core" }
+ezmempass-worker = { path = "../../libs/ezmempass-worker" }
 
 # utils
 # strum = { version = "0.25", features = ["derive", "strum_macros"] }

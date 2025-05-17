@@ -1,22 +1,25 @@
 /*
  * Password generator component for the EzMemPass application.
  */
-
-use ezmempass_core::generator::PasswordGeneratorFactory;
 use ezmempass_core::types::GenerationOptions;
+use ezmempass_worker::{EzMemPassWorker, Request, Response};
+use gloo_worker::oneshot;
 use leptos::prelude::*;
 
 /// Password generator component
 #[component]
 pub fn PasswordGenerator() -> impl IntoView {
-    let (options, set_options) = signal(GenerationOptions::default());
+    let (options, _set_options) = signal(GenerationOptions::default());
 
     let generate = Action::new(move |_: &()| {
         let opts = options.get_untracked();
-        // run blocking code inside `spawn_local` so we don't choke the event loop
         async move {
-            let generator = PasswordGeneratorFactory::create(opts.preferred_method);
-            generator.generate(&opts).unwrap()
+            // send request and await response
+            let Response::Generated(gp) =
+                oneshot::oneshot::<EzMemPassWorker>(Request::Generate(opts))
+                    .await
+                    .unwrap();
+            gp
         }
     });
 

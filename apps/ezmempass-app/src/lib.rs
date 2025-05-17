@@ -3,13 +3,16 @@ use leptos_meta::*;
 use leptos_router::{components::*, path};
 
 // Modules
-mod components;
+pub mod components;
 mod pages;
 
 // Top-Level pages
-use crate::pages::home::Home;
+use crate::pages::help::HelpPage;
+use crate::pages::home::HomePage;
+use crate::pages::not_found::NotFoundPage;
+use crate::pages::settings::SettingsPage;
 
-/// An app router which renders the homepage and handles 404's
+/// App root component
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -19,16 +22,21 @@ pub fn App() -> impl IntoView {
         <Html attr:lang="en" attr:dir="ltr" attr:data-theme="light" />
 
         // sets the document title
-        <Title text="Welcome to Leptos CSR" />
+        <Title text="EzMemPass - Memorable Password Generator" />
 
         // injects metadata in the <head> of the page
         <Meta charset="UTF-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <Meta name="description" content="Generate strong, memorable passwords" />
 
         <Router>
-            <Routes fallback=|| view! { NotFound }>
-                <Route path=path!("/") view=Home />
-            </Routes>
+            <main>
+                <Routes fallback=|| view! { <NotFoundPage /> }>
+                    <Route path=path!("/") view=HomePage />
+                    <Route path=path!("/settings") view=SettingsPage />
+                    <Route path=path!("/help") view=HelpPage />
+                </Routes>
+            </main>
         </Router>
     }
 }

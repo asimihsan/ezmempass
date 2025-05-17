@@ -5,15 +5,11 @@
 use crate::components::password_generator::PasswordGenerator;
 use leptos::prelude::*;
 
-use crate::components::navbar::Navbar;
-
 /// Home page component
 #[component]
 pub fn HomePage() -> impl IntoView {
     view! {
         <div class="flex flex-col min-h-svh">
-            <Navbar active="home" />
-
             <main class="container mx-auto px-4 grow">
                 <section class="mx-auto my-16 max-w-3xl text-center space-y-4">
                     <h1 class="text-4xl font-extrabold tracking-tight">"EzMemPass"</h1>

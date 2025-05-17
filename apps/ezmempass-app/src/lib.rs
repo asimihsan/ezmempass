@@ -1,16 +1,11 @@
+use crate::components::shell::Shell;
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::{components::*, path};
+use leptos_router::components::*;
 
 // Modules
 pub mod components;
 mod pages;
-
-// Top-Level pages
-use crate::pages::help::HelpPage;
-use crate::pages::home::HomePage;
-use crate::pages::not_found::NotFoundPage;
-use crate::pages::settings::SettingsPage;
 
 /// App root component
 #[component]
@@ -30,13 +25,7 @@ pub fn App() -> impl IntoView {
         <Meta name="description" content="Generate strong, memorable passwords" />
 
         <Router>
-            <main>
-                <Routes fallback=|| view! { <NotFoundPage /> }>
-                    <Route path=path!("/") view=HomePage />
-                    <Route path=path!("/settings") view=SettingsPage />
-                    <Route path=path!("/help") view=HelpPage />
-                </Routes>
-            </main>
+            <Shell/>
         </Router>
     }
 }

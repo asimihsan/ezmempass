@@ -4,3 +4,4 @@
 
 pub mod navbar;
 pub mod password_generator;
+pub mod shell;

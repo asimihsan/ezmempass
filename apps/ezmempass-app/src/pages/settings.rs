@@ -35,7 +35,9 @@ pub fn SettingsPage() -> impl IntoView {
                     <div class="setting-item">
                         <span>"Language"</span>
                         <select>
-                            <option value="en" selected=true>"English"</option>
+                            <option value="en" selected=true>
+                                "English"
+                            </option>
                             <option value="es">"Spanish"</option>
                             <option value="fr">"French"</option>
                             <option value="de">"German"</option>

@@ -1,0 +1,40 @@
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import "https://unpkg.com/open-props/buttons.min.css";
+
+/* Tailwind reset + utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+    --font-sans: "font", sans-serif;
+}
+
+@layer base {
+    :root {
+        --brand: var(--blue-6); /* Open Props color token */
+        --surface-0: #f9fafb;
+        --surface-1: #ffffff;
+        --surface-2: #f3f4f6;
+        --surface-3: #e5e7eb;
+    }
+
+    body {
+        @apply font-sans text-gray-900 bg-[--surface-0] m-0;
+    }
+}
+
+@layer components {
+    .card {
+        @apply rounded-lg border border-[--surface-3] bg-[--surface-1] p-6 shadow;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded bg-[--brand] text-white hover:opacity-90 transition;
+    }
+
+    .nav-active::after {
+        @apply content-[''] absolute left-0 -bottom-1
+        h-0.5 w-full bg-[--brand];
+    }
+}

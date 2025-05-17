@@ -1,9 +1,9 @@
 /*
  * Password generator traits and interfaces.
  */
-
 use crate::error::Result;
 use crate::types::{GeneratedPassword, GenerationOptions};
+use rand::prelude::SliceRandom;
 
 /// Trait for password generators
 pub trait PasswordGenerator {
@@ -45,6 +45,12 @@ impl PasswordGenerator for DummyPasswordGenerator {
             .cycle()
             .take(options.word_count)
             .collect();
+
+        // shuffle it just to prove we can return different results
+        let mut rng = rand::rng();
+        let mut selected: Vec<&str> = selected.iter().copied().collect();
+        selected.shuffle(&mut rng);
+
         let password = selected.join("-");
 
         Ok(GeneratedPassword {

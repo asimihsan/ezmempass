@@ -25,7 +25,7 @@ pub fn App() -> impl IntoView {
         <Meta name="description" content="Generate strong, memorable passwords" />
 
         <Router>
-            <Shell/>
+            <Shell />
         </Router>
     }
 }

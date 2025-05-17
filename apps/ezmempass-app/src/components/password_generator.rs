@@ -42,42 +42,27 @@ pub fn PasswordGenerator() -> impl IntoView {
                 <div class="option-group">
                     <div class="option-item">
                         <label for="word-count">"Word Count:"</label>
-                        <input
-                            type="range"
-                            prop:id="word-count"
-                            min="3"
-                            max="8"
-                            value="4"
-                        />
+                        <input type="range" prop:id="word-count" min="3" max="8" value="4" />
                         <span class="option-value">"4"</span>
                     </div>
                     <div class="option-item">
                         <label for="include-uppercase">"Include Uppercase:"</label>
-                        <input
-                            type="checkbox"
-                            prop:id="include-uppercase"
-                            checked=true
-                        />
+                        <input type="checkbox" prop:id="include-uppercase" checked=true />
                     </div>
                     <div class="option-item">
                         <label for="include-digits">"Include Digits:"</label>
-                        <input
-                            type="checkbox"
-                            prop:id="include-digits"
-                            checked=true
-                        />
+                        <input type="checkbox" prop:id="include-digits" checked=true />
                     </div>
                     <div class="option-item">
                         <label for="include-symbols">"Include Symbols:"</label>
-                        <input
-                            type="checkbox"
-                            prop:id="include-symbols"
-                        />
+                        <input type="checkbox" prop:id="include-symbols" />
                     </div>
                     <div class="option-item">
                         <label for="generation-method">"Generation Method:"</label>
                         <select prop:id="generation-method">
-                            <option value="model" selected=true>"Language Model"</option>
+                            <option value="model" selected=true>
+                                "Language Model"
+                            </option>
                             <option value="graph">"Graph Search"</option>
                             <option value="random">"Random"</option>
                         </select>

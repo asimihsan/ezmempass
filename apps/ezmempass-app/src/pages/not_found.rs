@@ -13,7 +13,9 @@ pub fn NotFoundPage() -> impl IntoView {
             <h1>"404 - Page Not Found"</h1>
             <div class="card">
                 <p>"The page you are looking for does not exist or has been moved."</p>
-                <A href="/" class:button=true>"Return to Home"</A>
+                <A href="/" class:button=true>
+                    "Return to Home"
+                </A>
             </div>
         </div>
     }

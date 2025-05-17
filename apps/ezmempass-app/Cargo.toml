@@ -22,4 +22,4 @@ console_error_panic_hook = "0.1"
 [dev-dependencies]
 wasm-bindgen = "0.2"
 wasm-bindgen-test = "0.3"
-web-sys = { version = "0.3", features = ["Document", "Window", "Element", "NodeList"] }
+web-sys = { version = "0.3", features = ["Document", "Window", "HtmlElement", "Text", "Element", "NodeList"] }

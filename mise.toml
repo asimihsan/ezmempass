@@ -1,4 +1,5 @@
 [tools]
+bun = "latest"
 cargo-binstall = "latest"
 just = "latest"
 node = "latest"

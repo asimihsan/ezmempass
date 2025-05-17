@@ -2,7 +2,7 @@
 # The index HTML file to drive the bundling process.
 target = "index.html"
 # Build in release mode.
-release = false
+release = true
 # Use a custom cargo profile. Overrides the default chosen by cargo. Ignored if the 'index.html' has one configured.
 # cargo_profile = ""
 # The output dir for all final assets.
@@ -25,6 +25,9 @@ inject_scripts = true
 # no_sri = false
 # An optional cargo profile to use
 # cargo_profile = "release-trunk"
+
+[tools]
+# tailwindcss = "4.1.6"
 
 [watch]
 # Paths to watch. The `build.target`'s parent folder is watched by default.

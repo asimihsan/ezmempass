@@ -13,14 +13,37 @@ pub fn Navbar(
     active: &'static str,
 ) -> impl IntoView {
     view! {
-        <nav class="navbar">
-            <div class="navbar-brand">
-                <A href="/">"EzMemPass"</A>
-            </div>
-            <div class="navbar-links">
-                <A href="/"          class:active=move || active == "home">     "Home"     </A>
-                <A href="/settings"  class:active=move || active == "settings"> "Settings" </A>
-                <A href="/help"      class:active=move || active == "help">     "Help"     </A>
+        <nav class="flex items-center justify-between h-16 px-8 bg-[--surface-2] shadow">
+            <A href="/" attr:class="text-xl font-bold text-[--brand]">
+                "EzMemPass"
+            </A>
+
+            <div class="flex gap-6 text-gray-700">
+                <A
+                    href="/"
+                    // turn the underline utilities on only when this is the current page
+                    class:nav-active=move || active == "home"
+                >
+                    "Home"
+                </A>
+                <a
+                    href="/settings"
+                    class=(
+                        "after:content-[''] after:w-full after:h-0.5 after:absolute after:-bottom-1 after:left-0 after:bg-[--brand]",
+                        move || active == "settings",
+                    )
+                >
+                    "Settings"
+                </a>
+                <a
+                    href="/help"
+                    class=(
+                        "after:content-[''] after:w-full after:h-0.5 after:absolute after:-bottom-1 after:left-0 after:bg-[--brand]",
+                        move || active == "help",
+                    )
+                >
+                    "Help"
+                </a>
             </div>
         </nav>
     }

@@ -5,6 +5,8 @@ set -euxo pipefail
 mise trust
 mise install
 
+rustup target add wasm32-unknown-unknown
+
 # Install cargo utilities needed for local development, including cargo-watch
 # These are also installed in CI via a similar cargo binstall step
 cargo binstall -y \
@@ -28,5 +30,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         brew install libiconv llvm || true
     fi
 fi
+
+(cd apps/ezmempass-app && bun install)
 
 echo "Development environment setup complete!"

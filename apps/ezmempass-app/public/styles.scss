@@ -9,44 +9,39 @@
 
 /* ------------------------------------------------------------ */
 
+
+:root {
+  --brand: var(--blue-6);
+}
+
 body {
-  font-family: sans-serif;
-  text-align: center;
+  font-family: system-ui, sans-serif;
+  background: var(--surface-0);
+  color: var(--text-1);
+  margin: 0;
 }
 
-.container {
+.navbar {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: var(--surface-2);
+
+  a {
+    text-decoration: none;
+    color: var(--brand);
+  }
 }
 
-.buttons {
-  display: flex;
-  justify-content: space-evenly;
+.hero {
+  margin: 4rem auto;
+  max-width: 45rem;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  text-align: center;
-  margin: 0 auto;
+.password-generator,
+.feature-card {
+  border: 1px solid var(--surface-3);
+  border-radius: var(--radius-2);
   padding: 2rem;
-}
-
-p,
-button {
-  margin: var(--size-6);
-}
-
-body > picture,
-button {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  margin: 2rem;
+  margin-block: 2rem;
 }

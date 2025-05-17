@@ -1,6 +1,5 @@
 use crate::components::navbar::Navbar;
 use leptos::prelude::*;
-use leptos_meta::*;
 use leptos_router::{components::*, path};
 
 // Top-Level pages

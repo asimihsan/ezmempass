@@ -27,7 +27,7 @@ inject_scripts = true
 # cargo_profile = "release-trunk"
 
 [tools]
-# tailwindcss = "4.1.6"
+tailwindcss = "4.1.6"
 
 [watch]
 # Paths to watch. The `build.target`'s parent folder is watched by default.

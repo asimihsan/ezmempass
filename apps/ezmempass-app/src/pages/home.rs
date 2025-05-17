@@ -1,52 +1,47 @@
-use crate::components::counter_btn::Button;
+/*
+ * Home page component for the EzMemPass application.
+ */
+
 use leptos::prelude::*;
 
-/// Default Home Page
+use crate::components::navbar::Navbar;
+use crate::components::password_generator::PasswordGenerator;
+
+/// Home page component
 #[component]
-pub fn Home() -> impl IntoView {
+pub fn HomePage() -> impl IntoView {
     view! {
-        <ErrorBoundary fallback=|errors| {
-            view! {
-                <h1>"Uh oh! Something went wrong!"</h1>
-
-                <p>"Errors: "</p>
-                // Render a list of errors as strings - good for development purposes
-                <ul>
-                    {move || {
-                        errors
-                            .get()
-                            .into_iter()
-                            .map(|(_, e)| view! { <li>{e.to_string()}</li> })
-                            .collect_view()
-                    }}
-
-                </ul>
-            }
-        }>
+        <div class="app-container">
+            <Navbar active="home" />
 
             <div class="container">
-
-                <picture>
-                    <source
-                        srcset="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_pref_dark_RGB.svg"
-                        media="(prefers-color-scheme: dark)"
-                    />
-                    <img
-                        src="https://raw.githubusercontent.com/leptos-rs/leptos/main/docs/logos/Leptos_logo_RGB.svg"
-                        alt="Leptos Logo"
-                        height="200"
-                        width="400"
-                    />
-                </picture>
-
-                <h1>"Welcome to Leptos"</h1>
-
-                <div class="buttons">
-                    <Button />
-                    <Button increment=5 />
+                <div class="hero">
+                    <h1>"EzMemPass"</h1>
+                    <h2>"Generate Strong, Memorable Passwords"</h2>
+                    <p>
+                        "Create secure passwords that are easy to remember using advanced language models and semantic connections."
+                    </p>
                 </div>
 
+                <div class="main-content">
+                    <PasswordGenerator />
+                </div>
+
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>"Memorable"</h3>
+                        <p>"Words connected by meaning are easier to remember than random characters."</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>"Secure"</h3>
+                        <p>"All passwords provide high entropy for strong security."</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>"Private"</h3>
+                        <p>"All generation happens locally on your device - no data leaves your browser."</p>
+                    </div>
+                </div>
             </div>
-        </ErrorBoundary>
+        </div>
     }
 }

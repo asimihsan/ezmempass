@@ -19,7 +19,7 @@ watch:
 check:
     cargo check --workspace --all-targets
 
-serve-app:
+serve-app: clippy
     cd apps/ezmempass-app && trunk serve --open
 
 # ---- Static Analysis ----

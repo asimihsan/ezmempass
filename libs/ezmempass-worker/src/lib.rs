@@ -1,6 +1,6 @@
 use ezmempass_core::{generator::PasswordGeneratorFactory, types::*};
-use futures::{sink::SinkExt, StreamExt};
-use gloo_worker::reactor::{reactor, ReactorScope};
+use futures::{StreamExt, sink::SinkExt};
+use gloo_worker::reactor::{ReactorScope, reactor};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum Request {

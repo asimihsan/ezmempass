@@ -48,7 +48,7 @@ impl PasswordGenerator for DummyPasswordGenerator {
 
         // shuffle it just to prove we can return different results
         let mut rng = rand::rng();
-        let mut selected: Vec<&str> = selected.iter().copied().collect();
+        let mut selected: Vec<&str> = selected.to_vec();
         selected.shuffle(&mut rng);
 
         let password = selected.join("-");

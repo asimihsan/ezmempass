@@ -7,9 +7,17 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
+console_error_panic_hook = "0.1"
+console_log = "1"
 ezmempass-core = { path = "../ezmempass-core" }
+futures.workspace = true
+getrandom = { version = "0.3", features = ["wasm_js"] }
 gloo-worker = {version = "0.5", features = ["futures"] }
+leptos.workspace = true
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.40"
 
 [lib]
 # Build both artifacts so the code can be linked as Rust **and**

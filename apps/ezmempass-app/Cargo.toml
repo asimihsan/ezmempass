@@ -8,10 +8,11 @@ authors.workspace = true
 
 [dependencies]
 console_error_panic_hook = "0.1"
-console_log = "1"
+console_log = "1.0"
+futures.workspace = true
 getrandom = { version = "0.3", features = ["wasm_js"] }
 gloo-worker = { version = "0.5", features = ["futures"] }
-leptos = { version = "0.8.2", features = ["csr"] }
+leptos.workspace = true
 leptos_meta = { version = "0.8.2" }
 leptos_router = { version = "0.8.2" }
 log = "0.4"

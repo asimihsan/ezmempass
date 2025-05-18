@@ -2,7 +2,7 @@
 # The index HTML file to drive the bundling process.
 target = "index.html"
 # Build in release mode.
-release = true
+release = false
 # Use a custom cargo profile. Overrides the default chosen by cargo. Ignored if the 'index.html' has one configured.
 # cargo_profile = ""
 # The output dir for all final assets.
@@ -25,11 +25,6 @@ inject_scripts = true
 # no_sri = false
 # An optional cargo profile to use
 # cargo_profile = "release-trunk"
-
-[[copy]]
-# Build and copy the worker bundle
-source = { crate = "../../libs/ezmempass-worker", path = "ezmempass_worker.js" }
-dest = "workers/ezmempass_worker.js"
 
 [tools]
 tailwindcss = "4.1.6"

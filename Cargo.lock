@@ -1704,6 +1704,7 @@ dependencies = [
  "console_log",
  "ezmempass-core",
  "ezmempass-worker",
+ "futures",
  "getrandom 0.3.3",
  "gloo-worker",
  "leptos",
@@ -1785,9 +1786,17 @@ dependencies = [
 name = "ezmempass-worker"
 version = "0.1.0"
 dependencies = [
+ "console_error_panic_hook",
+ "console_log",
  "ezmempass-core",
+ "futures",
+ "getrandom 0.3.3",
  "gloo-worker",
+ "leptos",
+ "log",
+ "serde",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

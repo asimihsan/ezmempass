@@ -1,31 +1,44 @@
 <!doctype html>
 <html>
-    <head>
-        <!-- Add a plain CSS file: see https://trunkrs.dev/assets/#css -->
-        <!-- If using Tailwind with Leptos CSR, see https://trunkrs.dev/assets/#tailwind instead-->
-        <link
+<head>
+    <!-- Add a plain CSS file: see https://trunkrs.dev/assets/#css -->
+    <!-- If using Tailwind with Leptos CSR, see https://trunkrs.dev/assets/#tailwind instead-->
+    <link
             data-trunk
             rel="tailwind-css"
             href="tailwind/input.css"
             data-inline
-        />
+    />
 
-        <!-- Include favicon in dist output: see https://trunkrs.dev/assets/#icon -->
-        <link data-trunk rel="icon" href="public/favicon.ico" />
+    <!-- Include favicon in dist output: see https://trunkrs.dev/assets/#icon -->
+    <link data-trunk rel="icon" href="public/favicon.ico"/>
 
-        <!-- include support for `wasm-bindgen --weak-refs` -->
-        <!-- "Without weak references your JS integration may be susceptible to memory leaks in Rust" [1] -->
-        <!-- [1] https://rustwasm.github.io/docs/wasm-bindgen/reference/weak-references.html -->
-        <link
+    <!-- include support for `wasm-bindgen --weak-refs` -->
+    <!-- "Without weak references your JS integration may be susceptible to memory leaks in Rust" [1] -->
+    <!-- [1] https://rustwasm.github.io/docs/wasm-bindgen/reference/weak-references.html -->
+    <link
             data-trunk
             rel="rust"
+            href="."
             data-wasm-opt="z"
             data-weak-refs
             data-reference-types
             data-typescript
-            data-bindgen-target="web"
-        />
-    </head>
+            data-type="main"
+    />
 
-    <body></body>
+    <link
+            data-trunk
+            rel="rust"
+            href="../../libs/ezmempass-worker"
+            data-wasm-opt="z"
+            data-weak-refs
+            data-reference-types
+            data-typescript
+            data-type="worker"
+            data-target-path="workers"
+    />
+</head>
+
+<body></body>
 </html>
